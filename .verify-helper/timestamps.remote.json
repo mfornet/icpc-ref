@@ -1,4 +1,5 @@
 {
 "tests/graph/lca.test.cpp": "2020-02-20 02:02:38 -0500",
-"tests/string/suffix_array.test.cpp": "2020-02-20 03:34:23 -0500"
+"tests/string/suffix_array.test.cpp": "2020-02-20 03:34:23 -0500",
+"tests/string/suffix_array_linear.test.cpp": "2020-02-20 03:49:24 -0500"
 }
