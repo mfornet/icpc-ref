@@ -1,3 +1,9 @@
+/*
+	Compute for a string S the suffix array order and rank of every suffix starting in (0, 1, ..., |S|-1)	
+	
+	Complexity: O(|S|)
+*/
+
 void get_buckets(int *s, const int n, vector<int> &bkt, const int K, bool end)
 {
 	for (int i = 0; i < K; ++i) bkt[i] = 0;
