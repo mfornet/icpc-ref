@@ -1,3 +1,12 @@
+/*
+	Update: a[p] += x
+	Query: return a[0] + a[1] + ... + a[p]
+	
+	Notes: p should by in 0-indexed
+	
+	Complexity: O(log n) update
+				O(log n) query
+*/
 template<typename T>
 struct fenwick
 {

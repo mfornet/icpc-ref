@@ -1,7 +1,11 @@
-// Static data structure for min/max queries
-// with O(n) space complexity
-// Complexity: O(n) for build, O(1) for query
+/*
+	Static data structure for min/max queries
+	
+	Notes: Return the position of the min/max
 
+	Complexity: O(n) build
+				O(1) query
+*/
 template<typename T, typename Compare = less<T>>
 struct direct_rmq
 {
