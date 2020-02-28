@@ -1,3 +1,9 @@
+/*
+	Notes: Be careful with compression path when you can't use it (example: for undo)
+	
+	Complexity: O(a(n)) with compression path
+				O(log n) without compression path
+*/
 struct union_find
 {
 	vector<int> p;
@@ -15,7 +21,6 @@ struct union_find
 		return true;
 	}
 
-	// be careful with compression path when you can't use it (example: for undo)
 	int root(int u) { return p[u] < 0 ? u : p[u] = root(p[u]); }
 	int size(int u) { return -p[root(u)]; }
 };
