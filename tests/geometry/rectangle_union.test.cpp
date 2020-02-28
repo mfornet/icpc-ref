@@ -1,5 +1,4 @@
 #define PROBLEM "http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_4_A"
-//#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/problems/DSL_4_A"
 
 #include <bits/stdc++.h>
 

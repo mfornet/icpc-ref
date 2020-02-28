@@ -1,5 +1,6 @@
 /*
-	Tested: MIT 2008 Team Contest 1 (Rectangles) 
+	Notes: rectangle contains coordinates of two opposite corners (xl <= xh, yl <= yh)
+	
 	Complexity: O(n log n)
 */
 
