@@ -3,6 +3,7 @@
 "tests/data_structures/direct_rmq.test.cpp": "2020-02-21 16:41:25 -0500",
 "tests/data_structures/rmq.test.cpp": "2020-02-21 16:41:25 -0500",
 "tests/data_structures/union_find.test.cpp": "2020-02-28 03:44:12 -0500",
+"tests/geometry/rectangle_union.test.cpp": "2020-02-28 14:17:52 -0500",
 "tests/graph/lca.test.cpp": "2020-02-20 16:13:57 -0500",
 "tests/string/suffix_array.test.cpp": "2020-02-20 16:13:57 -0500",
 "tests/string/suffix_array_linear.test.cpp": "2020-02-20 16:13:57 -0500"
