@@ -3,8 +3,7 @@
 	
 	Notes: If the path contains 0 edges the weight of the maximum edge is set to 0
 	
-	Complexity: O(n log n) build
-				O(log n) query
+	Complexity: O(n log n) build, O(log n) query
 */
 
 template<typename T, typename R = T>

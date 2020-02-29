@@ -1,8 +1,7 @@
 /*
 	Static data structure for min/max queries
 
-	Complexity: O(n log n) build
-				O(1) query
+	Complexity: O(n log n) build, O(1) query
 */
 template<typename T>
 struct rmq

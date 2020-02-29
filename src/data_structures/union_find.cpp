@@ -1,8 +1,7 @@
 /*
 	Notes: Be careful with compression path when you can't use it (example: for undo)
 	
-	Complexity: O(a(n)) with compression path
-				O(log n) without compression path
+	Complexity: O(a(n)) with compression path, O(log n) without compression path
 */
 struct union_find
 {

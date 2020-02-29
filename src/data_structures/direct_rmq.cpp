@@ -3,8 +3,7 @@
 	
 	Notes: Return the position of the min/max
 
-	Complexity: O(n) build
-				O(1) query
+	Complexity: O(n) build, O(1) query
 */
 template<typename T, typename Compare = less<T>>
 struct direct_rmq
@@ -33,7 +32,7 @@ struct direct_rmq
 			cur_lvl = next_lvl;
 		}
 
-		// deque<int> deq;
+		// deque<int> deq; // O(BlockSize) memory
 		// for (int i = 0; i < n; i += BlockSize)
 		// {
 		// 	while (!deq.empty() && deq.front() < i) deq.pop_front();
