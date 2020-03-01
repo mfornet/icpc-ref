@@ -3,6 +3,7 @@
 "tests/data_structures/abi2.test.cpp": "2020-02-29 19:15:06 -0500",
 "tests/data_structures/bit_array.test.cpp": "2020-02-29 19:15:06 -0500",
 "tests/data_structures/direct_rmq.test.cpp": "2020-02-29 12:34:45 -0500",
+"tests/data_structures/hash_table.test.cpp": "2020-02-29 19:36:37 -0500",
 "tests/data_structures/li_chao_tree.test.cpp": "2020-02-29 19:15:06 -0500",
 "tests/data_structures/monotonic_queue.test.cpp": "2020-02-29 19:27:03 -0500",
 "tests/data_structures/order_statistic.test.cpp": "2020-02-29 19:15:06 -0500",
