@@ -31,7 +31,7 @@ int main()
 		h.set(x + sh, x);
 	}
 	for (auto &i : a)
-		cout << i << " \n"[&i==&a.back()];
+		cout << i << "\n";
 
 	return 0;
 }

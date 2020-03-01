@@ -25,7 +25,7 @@ int main()
 		cin >> x;
 		mq.add(i, -x);
 		mq.remove(i-k);
-		if (i >= k-1) cout << -mq.max() << "\n";
+		if (i >= k-1) cout << -mq.max() << " \n"[i==n-1];
 	}
 
 	return 0;
