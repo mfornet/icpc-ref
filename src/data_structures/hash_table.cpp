@@ -1,7 +1,14 @@
+/*
+	hash_table based in linked list, collisions are supported
+
+	Notes: ** hash >= 0 **, n is the max number of supported hash insertions
+
+	Complexity: O(No of collisions) => O(1) expected
+*/
 template<typename H, typename T>
 struct hash_table
 {
-	static const int n = 5000010, mod = 5000007;
+	static const int n = 500010, mod = 500007;
 
 	H h[n];
 	T val[n];

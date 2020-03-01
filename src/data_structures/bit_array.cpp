@@ -1,3 +1,14 @@
+/*
+	Custom multi-dimensional array with numbers of l bits
+
+	Notes: td is the numbers of dimensions, l is the number of bits of each number,
+	       the constructor recieve the size of each dimension
+	       ** be careful with overflow, negative numbers are not supported **
+
+	Example: bitarray<2, 20> b({ 10, 5 }) = array[10][5] with numbers of 20 bits
+
+	Complexity: O(1) all operations
+*/
 template<const int td, const int l>
 struct bit_array
 {

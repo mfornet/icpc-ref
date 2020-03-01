@@ -4,7 +4,7 @@
 	
 	Notes: p should by in 0-indexed
 	
-	Complexity: O(log n) update, O(log n) query
+	Complexity: O(log n) update and query
 */
 template<typename T>
 struct fenwick
