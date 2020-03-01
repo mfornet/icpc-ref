@@ -1,4 +1,4 @@
-#define PROBLEM "http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_E"
+#define PROBLEM "http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ITP2_4_D"
 
 #include <bits/stdc++.h>
 
@@ -31,7 +31,7 @@ int main()
 		h.set(x + sh, x);
 	}
 	for (auto &i : a)
-		cout << i << "\n";
+		cout << i << " \n"[&i==&a.back()];
 
 	return 0;
 }
