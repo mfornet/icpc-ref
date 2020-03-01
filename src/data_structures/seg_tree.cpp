@@ -15,8 +15,8 @@ private:
 		}
 	}
 
-	template<typename T>
-	void build(int x, int b, int e, const vector<T> &a)
+	template<typename RAIter>
+	void build(int x, int b, int e, const RAIter &a)
 	{
 		if (b+1 == e)
 		{
@@ -108,8 +108,8 @@ private:
 	vector<node> st;
 
 public:
-	template<typename T>
-	void build(const vector<T> &a)
+	template<typename RAIter>
+	void build(const RAIter &a)
 	{
 		build(0, 0, n, a);
 	}
@@ -139,14 +139,14 @@ public:
 	segment_tree(int n) : n(n), st(2 * n - 1) {}
 };
 
-struct ap // arithmetic progression
+struct node // arithmetic progression
 {
 	struct node_container
 	{
 		ll x;
 
-		template<typename T>
-		inline void build(const T &a) // build(leave) from a
+		template<typename RAIter>
+		inline void build(const RAIter &a) // build(leave) from a
 		{
 
 		}
@@ -190,4 +190,4 @@ struct ap // arithmetic progression
 	}
 };
 
-// segment_tree<ap> st(n); // usage
+// segment_tree<node> st(n); // usage
