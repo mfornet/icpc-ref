@@ -12,9 +12,9 @@ struct rmq
 		int n = a.size(), lg = __lg(n);
 		dp.resize(lg+1, vector<T>(n));
 		dp[0] = a;
-		for (int j = 1; j <= lg; ++j)
-			for (int i = 0; i + (1<<j) <= n; ++i)
-				dp[j][i] = min(dp[j-1][i], dp[j-1][i+(1<<(j-1))]);
+		for (int j = 0; j < lg; ++j)
+			for (int i = 0; i + (1<<(j+1)) <= n; ++i)
+				dp[j+1][i] = min(dp[j][i], dp[j][i+(1<<j)]);
 	}
 
 	inline T query(int a, int b) // [a, b)
