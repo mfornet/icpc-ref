@@ -145,8 +145,8 @@ struct node // arithmetic progression
 	{
 		ll x;
 
-		template<typename RAIter>
-		inline void build(const RAIter &a) // build(leave) from a
+		template<typename T>
+		inline void build(const T &a) // build(leave) from a
 		{
 
 		}
