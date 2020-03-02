@@ -1,5 +1,5 @@
 /*
-	hash_table based in linked list, collisions are supported
+	hash_table based on linked list, collisions are supported
 
 	Notes: ** hash >= 0 **, n is the max number of supported hash insertions
 

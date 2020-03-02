@@ -1,4 +1,11 @@
-vector<int> lis(vector<int> a)
+/*
+	Longest increasing subsequnece (LIS)
+
+	Notes: returns the positions of a LIS
+
+	Complexity: O(n log n)
+*/
+vector<int> lis(const vector<int> &a)
 {
 	vector<int> l, who(a.size()), where(a.size());
 	for (auto &i : a)
@@ -13,5 +20,6 @@ vector<int> lis(vector<int> a)
 	for (int p = who[l.size()-1]; p != -1; p = where[p])
 		ans.push_back(p);
 
-	return move(ans);
+	reverse(ans.begin(), ans.end());
+	return ans;
 }
