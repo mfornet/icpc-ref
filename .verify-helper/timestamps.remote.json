@@ -11,6 +11,7 @@
 "tests/data_structures/union_find.test.cpp": "2020-02-29 12:34:45 -0500",
 "tests/dynamic_programming/lis.test.cpp": "2020-03-01 19:47:00 -0500",
 "tests/geometry/rectangle_union.test.cpp": "2020-02-28 18:58:24 -0500",
+"tests/graph/hld_lca.test.cpp": "2020-03-11 01:09:50 -0400",
 "tests/graph/lca.test.cpp": "2020-02-29 12:34:45 -0500",
 "tests/string/suffix_array.test.cpp": "2020-02-20 16:13:57 -0500",
 "tests/string/suffix_array_linear.test.cpp": "2020-02-20 16:13:57 -0500"
