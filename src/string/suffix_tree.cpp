@@ -1,8 +1,8 @@
-template<typename T>
+template<typename charT, typename Container>
 struct suffix_tree
 {
-	vector<T> s;
-	vector<map<T, int>> next;
+	vector<charT> s;
+	vector<Container> next;
 	vector<int> spos, len, link;
 	int node, pos, last;
 
@@ -17,17 +17,17 @@ struct suffix_tree
 		return spos.size()-1;
 	}
 
-	void extend(T c)
+	void extend(charT c)
 	{
-		for (s.push_back(c), pos++, last = 0; pos > 0; )
+		for (s.push_back(c), ++pos, last = 0; pos > 0; )
 		{
 			int n = s.size();
 			while (pos > len[next[node][s[n - pos]]])
 				node = next[node][s[n - pos]], pos -= len[node];
 
-			T edge = s[n - pos];
+			charT edge = s[n - pos];
 			int v = next[node][edge];
-			T t = s[spos[v] + pos - 1];
+			charT t = s[spos[v] + pos - 1];
 
 			if (v == 0)
 			{
@@ -51,7 +51,7 @@ struct suffix_tree
 			}
 			next[node][edge] = v;
 			if (node == 0)
-				pos--;
+				--pos;
 			else
 				node = link[node];
 		}

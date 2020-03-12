@@ -28,6 +28,11 @@ namespace IO
 		return input_buffer[advance ? input_pos++ : input_pos];
 	}
 
+	inline bool isspace(char c)
+	{
+		return (unsigned char) (c - '\t') < 5 || c == ' ';
+	}
+
 	template<typename T>
 	inline void read_int(T &number)
 	{
@@ -52,6 +57,27 @@ namespace IO
 	{
 		read_int(number);
 		read_int(args...);
+	}
+
+	inline void read_char(char &c)
+	{
+		while (isspace(next_char(false)))
+			next_char();
+
+		c = next_char();
+	}
+
+	inline void read_str(string &str)
+	{
+		while (isspace(next_char(false)))
+			next_char();
+
+		str.clear();
+
+		do
+		{
+			str += next_char();
+		} while (!isspace(next_char(false)));
 	}
 
 	void _flush_output()
@@ -92,6 +118,15 @@ namespace IO
 
 		for (int i = length - 1; i >= 0; i--)
 			write_char(number_buffer[i]);
+
+		if (after)
+			write_char(after);
+	}
+
+	inline void write_str(const string &str, char after = '\0')
+	{
+		for (char c : str)
+			write_char(c);
 
 		if (after)
 			write_char(after);
