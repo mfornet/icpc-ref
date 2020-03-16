@@ -1,3 +1,11 @@
+/*
+	Maximum Flow
+
+	Complexity: O(n^2 * m) faster in most cases
+	    O(min(n^(2/3), m^(1/2)) * m) in networks with unit capacities
+	    O(n^(1/2) * m) in bipartite networks
+*/
+
 template<typename C, typename R = C>
 struct dinic
 {

@@ -2,12 +2,10 @@
 	Maximum Flow (Goldberg-Tarjan)
 
 	Complexity: O(n^3) faster than Dinic in most cases
-
-	Tested: http://www.spoj.com/problems/FASTFLOW/
 */
 
 template<typename flow_type>
-struct goldberg_tarjan
+struct push_relabel
 {
 	struct edge
 	{
@@ -18,7 +16,7 @@ struct goldberg_tarjan
 	int n;
 	vector<vector<edge>> adj;
 
-	goldberg_tarjan(int n) : n(n), adj(n) {}
+	push_relabel(int n) : n(n), adj(n) {}
 
 	void add_edge(size_t src, size_t dst, flow_type cap, flow_type rcap = 0)
 	{
