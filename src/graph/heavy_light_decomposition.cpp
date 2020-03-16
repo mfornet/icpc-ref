@@ -63,15 +63,15 @@ struct heavy_light_decomposition
 		return (depth[u] < depth[v] ? u : v);
 	}
 
-	int query_up(int u, int v, bool excl_v)
+	ll query_up(int u, int v, bool excl_v)
 	{
-		int ans = 0;
+		ll ans = 0;
 		while (head[u] != head[v])
 		{
-			ans += ds.query(pos[head[u]], pos[u]+1);
+			ans += ds.query(pos[head[u]], pos[u]+1).x;
 			u = parent[head[u]];
 		}
-		if (pos[v]+excl_v <= pos[u]) ans += ds.query(pos[v]+excl_v, pos[u]+1);
+		if (pos[v]+excl_v <= pos[u]) ans += ds.query(pos[v]+excl_v, pos[u]+1).x;
 		return ans;
 	}
 
@@ -86,7 +86,7 @@ struct heavy_light_decomposition
 		if (pos[v]+excl_v <= pos[u]) ds.update(pos[v]+excl_v, pos[u]+1, c);
 	}
 
-	int query(int u, int v)
+	ll query(int u, int v)
 	{
 		int l = lca(u, v);
 		return query_up(u, l, excl_l) + query_up(v, l, true);

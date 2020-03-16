@@ -43,7 +43,7 @@ vector<int> dominators(const vector<vector<int>> &g, int r)
 		for (int v : g_rev[w])
 		{
 			int u = eval(v);
-        	if (rank[semi[w]] > rank[semi[u]]) semi[w] = semi[u];
+			if (rank[semi[w]] > rank[semi[u]]) semi[w] = semi[u];
 		}
 		dom[semi[w]].emplace_back(w);
 		anc[w] = prev[w];
