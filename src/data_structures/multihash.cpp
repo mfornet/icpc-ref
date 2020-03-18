@@ -42,6 +42,13 @@ namespace multihash
 		return x;
 	}
 
+	mhash to_mhash(int x)
+	{
+		mhash m;
+		m.fill(x);
+		return m;
+	}
+
 	void init(const mhash &b, const mhash &m)
 	{
 		M = m, B[1] = b, Z.fill(0), B[0].fill(1), iB[0].fill(1);

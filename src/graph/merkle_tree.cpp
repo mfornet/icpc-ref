@@ -13,9 +13,9 @@ namespace merkle_tree
 {
 	using namespace multihash;
 
-	void get(vector<mhash> &v)
+	void get(vector<mhash> &v, bool sorted = false)
 	{
-		sort(v.begin(), v.end()-1);
+		if (!sorted) sort(v.begin(), v.end()-1);
 		int n = v.size();
 		for (int i = 1; i < n; ++i)
 			v[i] = v[i-1] + v[i] * B[i];
@@ -43,7 +43,7 @@ namespace merkle_tree
 					sz[u] += sz[v];
 					h[u].push_back(h[v].back());
 				}
-			h[u].push_back({ sz[u], sz[u] });
+			h[u].push_back(to_mhash(sz[u]));
 			get(h[u]);
 		};
 		dfs1(0, -1);
@@ -63,11 +63,11 @@ namespace merkle_tree
 					ch[v] = h[v];
 					pos = lower_bound(rh[u].begin(), rh[u].end()-1, h[v].back()) - rh[u].begin();
 					h[u].back() = (pos ? h[u][pos-1] : Z) + (h[u].end()[-2] - h[u][pos]) * iB[1]
-										+ (mhash){sz[u], sz[u]} * B[h[u].size()-2];
+										+ to_mhash(sz[u]) * B[h[u].size()-2];
 					rget(h[v]);
-					h[v].back() = h[u].back();
-					h[v].push_back({ sz[v], sz[v] });
-					get(h[v]);
+					h[v].back().fill(sz[v]);
+					h[v].insert(lower_bound(h[v].begin(), h[v].end()-1, h[u].back()), h[u].back());
+					get(h[v], true);
 
 					dfs2(v, u);
 
