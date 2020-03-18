@@ -19,38 +19,19 @@ vector<ll> inverses(int n, int P)
 	vector<ll> inv(n+1, 1);
 	for (int i = 2; i <= n; ++i)
 		inv[i] = inv[P%i] * (P-P/i) % P;
-	return move(inv);
+	return inv;
 }
 
-ll add(ll a, ll b, ll M)
+template<typename T, typename U>
+T pow_mod(T a, U b, int mod)
 {
-	a += b;
-	if (a >= M) a -= M;
-	return a;
-}
-
-ll sub(ll a, ll b, ll M)
-{
-	if (a < b) a += M;
-	return a - b;
-}
-
-ll mul(ll a, ll b, ll M)
-{
-	ll q = (long double) a * (long double) b / (long double) M;
-	ll r = a * b - q * M;
-	return (r + 5 * M) % M;
-}
-
-ll pow(ll a, ll b, ll M)
-{
-	ll x = 1;
+	T r = 1;
 	for (; b > 0; b >>= 1)
 	{
-		if (b & 1) x = mul(x, a, M);
-		a = mul(a, a, M);
+		if (b & 1) r = (ll)r * a % mod;
+		a = (ll)a * a % mod;
 	}
-	return x;
+	return r;
 }
 
 ll inv(ll b, ll M)
@@ -76,7 +57,7 @@ ll div(ll a, ll b, ll M)
 		swap(t -= s * q, s);
 	}
 	if (a % t) return -1; // infeasible
-	return mul(x < 0 ? x + M : x, a / t, M);
+	return (x < 0 ? x + M : x) * (a / t) % M;
 }
 
 // Modular Matrix
@@ -100,7 +81,7 @@ mat mul(mat &A, mat &B, ll M)
 	for (int i = 0; i < l; ++i)
 		for (int k = 0; k < m; ++k)
 			for (int j = 0; j < n; ++j)
-				C[i][j] = add(C[i][j], mul(A[i][k], B[k][j], M), M);
+				C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % M;
 	return C;
 }
 
@@ -134,18 +115,18 @@ mat inv(mat A, ll M)
 		swap(B[i], B[j]);
 		ll inv = div(1, A[i][i], M);
 		for (int k = i; k < n; ++k)
-			A[i][k] = mul(A[i][k], inv, M);
+			A[i][k] = A[i][k] * inv % M;
 		for (int k = 0; k < n; ++k)
-			B[i][k] = mul(B[i][k], inv, M);
+			B[i][k] = B[i][k] * inv % M;
 		for (int j = 0; j < n; ++j)
 		{
 			if (i == j || A[j][i] == 0)
 				continue;
 			ll cor = A[j][i];
 			for (int k = i; k < n; ++k)
-				A[j][k] = sub(A[j][k], mul(cor, A[i][k], M), M);
+				A[j][k] = (A[j][k] - cor * A[i][k] % M + M) % M;
 			for (int k = 0; k < n; ++k)
-				B[j][k] = sub(B[j][k], mul(cor, B[i][k], M), M);
+				B[j][k] = (B[j][k] - cor * B[i][k] % M + M) % M;
 		}
 	}
 
