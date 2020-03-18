@@ -31,7 +31,7 @@ vector<mhash> get(string s)
 	h[0].fill(0);
 	for (int i = 1; i <= n; ++i)
 	{
-		h[i].fill(s[i-1] - 'a' + 1);
+		h[i].fill(s[i-1] + 1);
 		h[i] = h[i-1] + h[i] * B[i];
 	}
 	return h;
@@ -41,7 +41,7 @@ int main()
 {
 	ios_base::sync_with_stdio(0), cin.tie(0);
 
-	init({ 13, 23 }, { (int)1e9+7, (int)1e9+9 });
+	init({ 313, 433 }, { (int)1e9+7, (int)1e9+9 });
 	string a, b;
 	cin >> a >> b;
 
