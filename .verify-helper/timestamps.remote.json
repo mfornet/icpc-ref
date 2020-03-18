@@ -18,6 +18,7 @@
 "tests/graph/hld3.test.cpp": "2020-03-16 03:59:16 -0400",
 "tests/graph/hld_lca.test.cpp": "2020-03-16 02:53:46 -0400",
 "tests/graph/lca.test.cpp": "2020-02-29 12:34:45 -0500",
+"tests/graph/merkle_tree.test.cpp": "2020-03-18 03:05:25 -0400",
 "tests/graph/min_cost_flow.test.cpp": "2020-03-16 03:59:16 -0400",
 "tests/graph/push_relabel.test.cpp": "2020-03-16 03:59:16 -0400",
 "tests/string/suffix_array.test.cpp": "2020-02-20 16:13:57 -0500",
