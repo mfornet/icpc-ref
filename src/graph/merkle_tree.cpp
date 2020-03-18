@@ -32,7 +32,8 @@ namespace merkle_tree
 	{
 		int n = adj.size(), pos;
 		vector<int> sz(n, 1);
-		vector<vector<mhash>> h(n), ch(n), rh(n);
+		vector<mhash> ch(n);
+		vector<vector<mhash>> h(n), rh(n);
 
 		function<void(int, int)> dfs1 = [&](int u, int p)
 		{
@@ -60,7 +61,7 @@ namespace merkle_tree
 				{
 					sz[u] -= sz[v];
 					sz[v] = n;
-					ch[v] = h[v];
+					ch[v] = h[v].back();
 					pos = lower_bound(rh[u].begin(), rh[u].end()-1, h[v].back()) - rh[u].begin();
 					h[u].back() = (pos ? h[u][pos-1] : Z) + (h[u].end()[-2] - h[u][pos]) * iB[1]
 										+ to_mhash(sz[u]) * B[h[u].size()-2];
@@ -72,7 +73,7 @@ namespace merkle_tree
 					dfs2(v, u);
 
 					h[u].back() = h[u].end()[-2] + rh[u].back() * B[h[u].size()-1];
-					h[v] = ch[v];
+					h[v].back() = ch[v];
 					sz[v] = n - sz[u];
 					sz[u] = n;
 				}
