@@ -51,7 +51,7 @@ namespace fft
 			{
 				roots[i << 1] = roots[i];
 				double angle_i = theta * (2 * i + 1 - (1 << cur_bits));
-				double x = sin(angle_i), y = cos(angle_i);
+				double y = sin(angle_i), x = cos(angle_i);
 				//sincos(angle_i, &y, &x);
 				roots[(i << 1) + 1] = point(x, y);
 			}
