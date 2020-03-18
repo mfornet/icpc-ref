@@ -10,6 +10,7 @@ typedef long double ld;
 #define F first
 #define S second
 
+#define double ld
 #include "../../src/math/fast_fourier_transform(very_fast).cpp"
 
 int main()

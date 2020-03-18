@@ -10,6 +10,7 @@ typedef long double ld;
 #define F first
 #define S second
 
+#define double ld
 #include "../../src/math/fast_fourier_transform.cpp"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 	vector<int> a(n), b(m);
 	for (auto &i : a) cin >> i;
 	for (auto &i : b) cin >> i;
-	auto ans = convolve(a, b, 998244353);
+	auto ans = fft::convolve(a, b, 998244353);
 	for (auto &i : ans)
 		cout << i << " \n"[&i==&ans.back()];
 

@@ -58,6 +58,7 @@ namespace ntt
 		for (int i = 0; i < sz; ++i)
 			x[i] = (ll)x[i] * y[i] % mod;
 		fft(x.data(), sz, -1);
+		x.resize(n);
 		return x;
 	}
 
