@@ -10,17 +10,7 @@ typedef complex<ll> point;
 #define F first
 #define S second
 
-int Pow(int a, int b, int mod)
-{
-	int x = 1;
-	for (; b > 0; b >>= 1)
-	{
-		if (b & 1) x = (ll)x * a % mod;
-		a = (ll)a * a % mod;
-	}
-	return x;
-}
-
+#include "../../src/number_theory/modular_arithmetics.cpp"
 #include "../../src/data_structures/multihash.cpp"
 using namespace multihash;
 

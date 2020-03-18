@@ -21,6 +21,7 @@ ll Pow(ll a, ll b, ll mod)
 	return x;
 }
 
+#include "../../src/number_theory/modular_arithmetics.cpp"
 #include "../../src/data_structures/union_find.cpp"
 #include "../../src/data_structures/multihash.cpp"
 #include "../../src/graph/merkle_tree.cpp"

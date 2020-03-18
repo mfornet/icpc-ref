@@ -1,9 +1,12 @@
-// Fast Fourier Transform
-// Complexity: O(n log n)
-// NOTE: fft function doesn't normalize when 
-// call it with sign=-1, you must do it be yourself,
-// implementing your own point is much faster
+/*
+	Fast Fourier Transform
 
+	Notes: fft_core function doesn't normalize when 
+	    call it with sign=-1, you must do it be yourself
+	    ** #define double ld if you have precision issues (probably for n around 5e5) **
+
+	Complexity: O(n log n)
+*/
 
 // using point = complex<double>;
 struct point

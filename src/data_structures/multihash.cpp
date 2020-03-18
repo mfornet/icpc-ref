@@ -53,7 +53,7 @@ namespace multihash
 	{
 		M = m, B[1] = b, Z.fill(0), B[0].fill(1), iB[0].fill(1);
 		for (int i = 0; i < D; ++i)
-			iB[1][i] = Pow(B[1][i], M[i]-2, M[i]);
+			iB[1][i] = pow_mod(B[1][i], M[i]-2, M[i]);
 		for (int i = 2; i < N; ++i)
 		{
 			B[i] = B[i-1] * B[1];

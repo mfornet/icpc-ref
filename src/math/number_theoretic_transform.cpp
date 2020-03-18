@@ -1,3 +1,11 @@
+/*
+	Number Theoretic Transform
+
+	Notes: mod = 2**k * c + 1 should be prime, k >= max_degree
+
+	Complexity: O(n log n)
+*/
+
 namespace ntt
 {
 	const int mod = 998244353;
