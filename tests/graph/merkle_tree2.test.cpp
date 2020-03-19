@@ -62,7 +62,7 @@ int main()
 					adj[id[edges[i].S]].push_back(id[edges[i].F]);
 				}
 
-			auto h = merkle_tree::solve(adj);
+			auto h = merkle_tree2::solve(adj);
 			ans.push_back(*min_element(h.begin(), h.end()));
 		}
 	}
