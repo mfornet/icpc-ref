@@ -3,10 +3,9 @@
 	the hash of its subtree
 
 	Notes: ans[u] is the hash of the tree rooted at u
+	** Rolling Hashing is bad for hash a tree, see merkle_tree2 **
 
 	Complexity: O(n log n)
-
-	Tested: https://www.spoj.com/problems/TREEISO/
 */
 
 namespace merkle_tree
@@ -81,4 +80,75 @@ namespace merkle_tree
 		dfs2(0, -1);
 		return ans;
 	}
+}
+
+/*
+	Complexity: O(n log mod) per module used
+*/
+
+namespace merkle_tree2
+{
+    using namespace multihash;
+    vector<int> mask;
+
+    vector<mhash> solve(const vector<vector<int>> &adj)
+    {
+        int n = adj.size();
+        vector<pair<int, bool>> d(n);
+        vector<mhash> h(n), ans(n);
+        const int mx = *min_element(M.begin(), M.end());
+        while (mask.size() < n)
+            mask.push_back(randint(0, mx));
+
+        auto f = [&](int u, int p)
+        {
+            d[u].F = 0, d[u].S = false;
+            for (auto v : adj[u])
+                if (v != p)
+                {
+                    if (d[v].F + 1 > d[u].F) d[u].F = d[v].F + 1, d[u].S = true;
+                    else if (d[v].F + 1 == d[u].F) d[u].S = false;
+                }
+            h[u].fill(1);
+            for (auto v : adj[u])
+                if (v != p)
+                    h[u] = h[u] * (h[v] + to_mhash(mask[d[u].F]));
+        };
+
+        function<void(int, int)> dfs1 = [&](int u, int p)
+        {
+            for (auto v : adj[u])
+                if (v != p)
+                    dfs1(v, u);
+            f(u, p);
+        };
+        dfs1(0, -1);
+
+        function<void(int, int)> dfs2 = [&](int u, int p)
+        {
+            ans[u] = h[u];
+            for (auto v : adj[u])
+                if (v != p)
+                {                    
+                    auto du = d[u];
+                    auto dv = d[v];
+                    mhash hu = h[u];
+                    mhash hv = h[v];
+
+                    if (d[u].F == d[v].F + 1 && d[u].S) f(u, v);
+                    else h[u] = h[u] * inv(h[v] + to_mhash(mask[d[u].F]));
+
+                    f(v, -1);
+
+                    dfs2(v, u);
+
+                    d[u] = du;
+                    d[v] = dv;
+                    h[u] = hu;
+                    h[v] = hv;
+                }
+        };
+        dfs2(0, -1);
+        return ans;
+    }
 }

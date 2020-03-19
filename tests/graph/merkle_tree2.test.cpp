@@ -20,7 +20,7 @@ int main()
 {
 	ios_base::sync_with_stdio(0), cin.tie(0);
 
-	multihash::init({ 13, 23 }, { (int)1e9+7, (int)1e9+9 });
+	multihash::init({ 23, 13 }, { 14821, 17351 });
 	using namespace multihash;
 
 	int n;
@@ -63,11 +63,7 @@ int main()
 				}
 
 			auto h = merkle_tree::solve(adj);
-			sort(h.begin(), h.end());
-			auto v = h[0];
-			for (size_t i = 1; i < h.size(); ++i)
-				v = v + h[i] * B[i];
-			ans.push_back(v);
+			ans.push_back(*min_element(h.begin(), h.end()));
 		}
 	}
 

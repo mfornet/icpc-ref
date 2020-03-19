@@ -42,6 +42,13 @@ namespace multihash
 		return x;
 	}
 
+	mhash inv(mhash lhs)
+	{
+		for (int i = 0; i < D; ++i)
+			lhs[i] = pow_mod(lhs[i], M[i]-2, M[i]);
+		return lhs;
+	}
+
 	mhash to_mhash(int x)
 	{
 		mhash m;
@@ -51,9 +58,7 @@ namespace multihash
 
 	void init(const mhash &b, const mhash &m)
 	{
-		M = m, B[1] = b, Z.fill(0), B[0].fill(1), iB[0].fill(1);
-		for (int i = 0; i < D; ++i)
-			iB[1][i] = pow_mod(B[1][i], M[i]-2, M[i]);
+		M = m, B[1] = b, iB[1] = inv(b), Z.fill(0), B[0].fill(1), iB[0].fill(1);
 		for (int i = 2; i < N; ++i)
 		{
 			B[i] = B[i-1] * B[1];
