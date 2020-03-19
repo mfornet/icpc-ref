@@ -32,7 +32,7 @@ private:
 		st[x].nod = st[x + 1].nod + st[y].nod;
 	}
 
-	void update(int x, int b, int e)
+	void update_(int x, int b, int e)
 	{
 		if (lo <= b && e <= hi)
 		{
@@ -44,8 +44,8 @@ private:
 		int y = x + ((m - b) << 1);
 		push(x, b, e, m);
 
-		if (lo < m) update(x + 1, b, m);
-		if (m < hi) update(y, m, e);
+		if (lo < m) update_(x + 1, b, m);
+		if (m < hi) update_(y, m, e);
 		st[x].nod = st[x + 1].nod + st[y].nod;
 	}
 
@@ -116,7 +116,7 @@ public:
 
 	void update(int l, int r, const lazy_container &x)
 	{
-		lo = l, hi = r, lazy = x, update(0, 0, n);
+		lo = l, hi = r, lazy = x, update_(0, 0, n);
 	}
 
 	node_container query(int l, int r)
