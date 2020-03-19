@@ -19,6 +19,7 @@
 "tests/graph/hld_lca.test.cpp": "2020-03-16 02:53:46 -0400",
 "tests/graph/lca.test.cpp": "2020-02-29 12:34:45 -0500",
 "tests/graph/merkle_tree.test.cpp": "2020-03-18 21:14:36 -0400",
+"tests/graph/merkle_tree2.test.cpp": "2020-03-18 21:18:54 -0400",
 "tests/graph/min_cost_flow.test.cpp": "2020-03-16 03:59:16 -0400",
 "tests/graph/push_relabel.test.cpp": "2020-03-16 03:59:16 -0400",
 "tests/math/fast_fourier_transform(very_fast).test.cpp": "2020-03-18 17:54:23 -0400",
