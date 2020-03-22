@@ -410,7 +410,7 @@ struct bigint
 
 	bigint operator*(const bigint &v) const
 	{
-		if (min(z.size(), v.z.size()) < 1)
+		if (min(z.size(), v.z.size()) < 150)
 			return mul_simple(v);
 		bigint res;
 		res.sign = sign * v.sign;

@@ -27,7 +27,7 @@ struct lowest_common_ancestor
 		queue<int> q;
 		q.push(r);
 		lca[0][r] = -1;
-		lvl[r] = 1;
+		lvl[r] = 0;
 
 		for (int u, v; !q.empty(); )
 		{
@@ -56,23 +56,25 @@ struct lowest_common_ancestor
 			swap(u, v);
 
 		R D = 0;
-		for (int i = __lg(lvl[u]); i >= 0; --i)
-			if (lvl[u] - (1 << i) >= lvl[v])
-			{
-				D = max(D, dist[i][u]);
-				u = lca[i][u];
-			}
+		if (lvl[u])
+			for (int i = __lg(lvl[u]); i >= 0; --i)
+				if (lvl[u] - (1 << i) >= lvl[v])
+				{
+					D = max(D, dist[i][u]);
+					u = lca[i][u];
+				}
 
 		if (u == v)
 			return { u, D };
 
-		for (int i = __lg(lvl[u]); i >= 0; --i)
-			if ((1 << i) <= lvl[u] && lca[i][u] != lca[i][v])
-			{
-				D = max({D, dist[i][v], dist[i][u]});
-				u = lca[i][u];
-				v = lca[i][v];
-			}
+		if (lvl[u])
+			for (int i = __lg(lvl[u]); i >= 0; --i)
+				if ((1 << i) <= lvl[u] && lca[i][u] != lca[i][v])
+				{
+					D = max({D, dist[i][v], dist[i][u]});
+					u = lca[i][u];
+					v = lca[i][v];
+				}
 
 		D = max({D, dist[0][u], dist[0][v]});
 		return { lca[0][u], D };
