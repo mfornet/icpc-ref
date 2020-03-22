@@ -27,6 +27,12 @@
 "tests/math/fast_fourier_transform.test.cpp": "2020-03-18 17:54:23 -0400",
 "tests/math/fast_fourier_transform2.test.cpp": "2020-03-18 17:54:23 -0400",
 "tests/math/number_theoretic_transform.test.cpp": "2020-03-18 17:54:23 -0400",
+"tests/number_theory/big_integer_add.test.cpp": "2020-03-22 17:00:52 -0400",
+"tests/number_theory/big_integer_div.test.cpp": "2020-03-22 17:00:52 -0400",
+"tests/number_theory/big_integer_mul.test.cpp": "2020-03-22 17:00:52 -0400",
+"tests/number_theory/big_integer_mul2.test.cpp": "2020-03-22 17:00:52 -0400",
+"tests/number_theory/big_integer_rem.test.cpp": "2020-03-22 17:00:52 -0400",
+"tests/number_theory/big_integer_sub.test.cpp": "2020-03-22 17:00:52 -0400",
 "tests/string/suffix_array.test.cpp": "2020-02-20 16:13:57 -0500",
 "tests/string/suffix_array_linear.test.cpp": "2020-02-20 16:13:57 -0500"
 }
