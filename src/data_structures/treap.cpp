@@ -1,4 +1,120 @@
+template<class node>
 struct treap
+{
+	inline int size(node *u) { return u ? u->inf.sz : 0; }
+	inline void push(node *u) { if (u) u->push(); }
+
+	node* update(node *u)
+	{
+		u->inf = node::info(u->ky);
+		if (u->l) u->inf = node::merge(u->l->inf, u->inf);
+		if (u->r) u->inf = node::merge(u->inf, u->r->inf);
+		return u;
+	}
+
+	pair<node*, node*> split(node* u, int k)
+	{// split for the kth first elements
+		push(u);
+
+		if (!u) return { u, u };
+
+		if (size(u->l) >= k)
+		{
+			auto s = split(u->l, k);
+			u->l = s.second;
+			return { s.first, update(u) };
+		}
+
+		auto s = split(u->r, k - size(u->l) - 1);
+		u->r = s.first;
+		return { update(u), s.second };
+	}
+
+	node* merge(node *u, node *v)
+	{
+		push(u), push(v);
+
+		if (!u || !v) return u ? u : v;
+
+		if (u->prio > v->prio)
+		{
+			u->r = merge(u->r, v);
+			return update(u);
+		}
+
+		v->l = merge(u, v->l);
+		return update(v);
+	}
+
+	int less(node *u, const typename node::key &ky)
+	{
+		int l = 0;
+		while (u)
+		{
+			if (u->ky < ky) l += size(u->l) + 1, u = u->r;
+			else u = u->l;
+		}
+		return l;
+	}
+
+	node* kth(node *u, int k)
+	{
+		while (u && size(u->l) + 1 != k)
+		{
+			if (size(u->l) >= k) u = u->l;
+			else k -= size(u->l) + 1, u = u->r;
+		}
+		return u;
+	}
+};
+
+struct node
+{
+	struct key
+	{
+		int x;
+	} ky;
+
+	struct info
+	{
+		int sz, sum;
+		info(key k) : sz(1), sum(k.x) {}
+	} inf;
+
+	struct lazy
+	{
+		bool rev;
+		lazy() : rev(false) {}
+	} lz;
+
+	static info merge(info lhs, const info &rhs)
+	{
+		lhs.sz += rhs.sz;
+		lhs.sum += rhs.sum;
+	}
+
+	void push()
+	{
+		if (lz.rev)
+		{
+			swap(l, r);
+			if (l) l->lz.rev ^= true;
+			if (r) r->lz.rev ^= true;
+			lz.rev = false;
+		}
+	}
+
+	node *l, *r;
+	int prio;
+
+	node(key k) : ky(k), inf(k)
+	{
+		l = r = NULL;
+		prio = rand();
+	}
+};
+
+/*struct treap
 {
 	struct node
 	{
@@ -110,3 +226,4 @@ struct treap
 
 	treap() : root(NULL) {}
 };
+*/

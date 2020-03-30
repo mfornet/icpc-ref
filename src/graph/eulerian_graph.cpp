@@ -50,8 +50,8 @@ vector<int> euler_path(vector<vector<int>> G, int s = 0)
 	{
 		m += G[u].size();
 		for (auto v : G[u])
-			--deg[v];			//  in-deg
-		deg[u] += G[u].size();	// out-deg
+			--deg[v];           //  in-deg
+		deg[u] += G[u].size();  // out-deg
 	}
 
 	vector<int> path;

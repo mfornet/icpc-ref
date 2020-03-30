@@ -69,3 +69,13 @@ int qua(point x)
 	if (x.real() < 0 && x.imag() <= 0) return 2;
 	return 3;
 }
+
+// assert((0, 0) not in v)
+sort(v.begin(), v.end(), [](const point &x, const point &y)
+{
+	int qx = qua(x);
+	int qy = qua(y);
+	if (qx != qy) return qx < qy;
+	//if (cross(x, y) == 0) return norm(x) < norm(y);
+	return cross(x, y) > 0;
+});
