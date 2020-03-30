@@ -5,26 +5,8 @@
 
 	Complexity: O(n log n)
 */
-template<typename T>
-vector<int> lis(const vector<T> &a)
-{
-	vector<T> l;
-	for (auto &i : a)
-	{
-		auto it = lower_bound(l.begin(), l.end(), i) - l.begin();
-		if (it == l.size()) l.emplace_back();
-		l[it] = i;
-	}
 
-	vector<int> ans;
-	for (int i = 0, p = 0; p < l.size(); ++i)
-		if (a[i] == l[p])
-			ans.push_back(i), ++p;
-
-	return ans;
-}
-
-vector<int> lis_old(const vector<int> &a)
+vector<int> lis(const vector<int> &a)
 {
 	vector<int> l, who(a.size()), where(a.size());
 	for (auto &i : a)

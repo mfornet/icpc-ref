@@ -66,6 +66,18 @@ struct treap
 		}
 		return u;
 	}
+
+	/*int pos(node *u) // require parents
+	{
+		int r = size(u->l);
+		while (u->p != NULL)
+		{
+			if (u->p->r == u)
+				r += size(u->p->l) + 1;
+			u = u->p;
+		}
+		return r;
+	}*/
 };
 
 struct node
