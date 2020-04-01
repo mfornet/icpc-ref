@@ -6,9 +6,11 @@
 	Complexity: O(n log n)
 */
 
-vector<int> lis(const vector<int> &a)
+template<typename T>
+vector<int> lis(const vector<T> &a)
 {
-	vector<int> l, who(a.size()), where(a.size());
+	if (a.empty()) return {};
+	vector<T> l; vector<int> who(a.size()), where(a.size());
 	for (auto &i : a)
 	{
 		auto it = lower_bound(l.begin(), l.end(), i) - l.begin();
