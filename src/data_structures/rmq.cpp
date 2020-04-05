@@ -13,7 +13,7 @@ struct rmq
 		dp.resize(lg+1, vector<T>(n));
 		dp[0] = a;
 		for (int j = 0; j < lg; ++j)
-			for (int i = 0; i + (1<<(j+1)) <= n; ++i)
+			for (int i = 0; i + (2<<j) <= n; ++i)
 				dp[j+1][i] = min(dp[j][i], dp[j][i+(1<<j)]);
 	}
 
