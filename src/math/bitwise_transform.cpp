@@ -51,8 +51,8 @@ namespace bitwise_transform
 		transform<B, P>(b.data(), sz);
 		for (int i = 0; i < sz; ++i)
 		{
-			a[i] *= b[i];
-			if (P != -1) a[i] %= P;
+			if (P == -1) a[i] *= b[i];
+			else a[i] = (ll)a[i] * b[i] % P;
 		}
 		transform<B, P, true>(a.data(), sz);
 		return a;
