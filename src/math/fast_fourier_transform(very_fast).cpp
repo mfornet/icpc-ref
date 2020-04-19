@@ -164,7 +164,7 @@ namespace fft
 		}
 		return ans;
 	}
-};
+}
 
 // asume non-negative numbers
 const int WIDTH = 5;
