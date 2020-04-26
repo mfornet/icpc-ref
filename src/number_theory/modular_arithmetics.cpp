@@ -34,6 +34,42 @@ T pow_mod(T a, U b, int mod)
 	return r;
 }
 
+namespace combinatorics
+{
+	const int mod = 998244353, N = 2e5+5; // mod must be prime
+	int fac[N], ifac[N];
+
+	void init()
+	{
+		fac[0] = ifac[0] = 1;
+		for (int i = 1; i < N; ++i)
+		{
+			fac[i] = (ll)fac[i-1] * i % mod;
+			ifac[i] = pow_mod(fac[i], mod-2, mod);
+		}
+	}
+
+	int comb(int n, int k)
+	{
+		return (ll)fac[n] * ifac[n-k] % mod * ifac[k] % mod;
+	}
+
+	// n objects to be placed into k(possible empty) bins
+	int starsandbars(int n, int k)
+	{
+		return comb(n+k-1, k-1);
+	}
+
+	// partitions of an n element set into k non-empty sets
+	int stirling(int n, int k) // (2nd kind)
+	{
+		int r = 0;
+		for (int i = 0; i < k; ++i)
+			r = (r + ((i&1) ? -1 : +1) * (ll)comb(k, i) * pow_mod(k-i, n, mod)) % mod;
+		return ((ll)r + mod) % mod * ifac[k] % mod;
+	}
+}
+
 ll inv(ll b, ll M)
 {
 	ll u = 1, x = 0, s = b, t = M;
