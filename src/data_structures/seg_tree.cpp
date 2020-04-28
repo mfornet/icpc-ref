@@ -170,8 +170,7 @@ struct node // arithmetic progression
 			return first != 0 || dif != 0 || clear;
 		}
 
-		lazy_container() : clear(0), first(0), dif(0) {}
-		lazy_container(bool clear, ll first, ll dif) : clear(clear), first(first), dif(dif) {}
+		lazy_container(bool clear = 0, ll first = 0, ll dif = 0) : clear(clear), first(first), dif(dif) {}
 	} lazy;
 
 	inline void apply(int l, int r, const lazy_container &p, int szl) // apply lazy
@@ -189,5 +188,3 @@ struct node // arithmetic progression
 		lazy.dif += p.dif;
 	}
 };
-
-// segment_tree<node> st(n); // usage
