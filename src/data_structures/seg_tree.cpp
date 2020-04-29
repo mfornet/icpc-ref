@@ -34,7 +34,10 @@ private:
 
 	void update_(int x, int b, int e)
 	{
+		//if (st[x].break_condition(lazy)) return;
+
 		if (lo <= b && e <= hi)
+			//if (st[x].tag_condition(lazy))
 		{
 			st[x].apply(b, e, lazy, b-lo);
 			return;
@@ -148,7 +151,7 @@ struct node // arithmetic progression
 		template<typename T>
 		inline void build(const T &a) // build(leave) from a
 		{
-
+			x = a;
 		}
 
 		friend node_container operator+(node_container l, const node_container &r) // merge l and r
@@ -186,5 +189,78 @@ struct node // arithmetic progression
 		nod.x += first * sz + ((ll)sz-1) * sz / 2 * p.dif;
 		lazy.first += first;
 		lazy.dif += p.dif;
+	}
+};
+
+// ** UNCOMMENT lines in update_ ** Tested: https://vjudge.net/problem/HDU-5306
+struct beats // segment tree beats (update ai = min(ai, x), query for max or sum)
+{
+	const static int oo = numeric_limits<int>::max();
+
+	struct node_container
+	{
+		int mx;  // max
+		int mxc; // max count
+		int mx2; // second strict max
+		ll sum;
+
+		template<typename T>
+		inline void build(const T &a) // build(leave) from a
+		{
+			mx = a;
+			mxc = 1;
+			mx2 = -1;
+			sum = a;
+		}
+
+		friend node_container operator+(node_container l, const node_container &r) // merge l and r
+		{
+			if (l.mx != r.mx)
+			{
+				if (r.mx > l.mx) l.mx2 = max(l.mx, r.mx2), l.mx = r.mx, l.mxc = r.mxc;
+				else l.mx2 = max(l.mx2, r.mx);
+			}
+			else
+			{
+				l.mxc += r.mxc;
+				l.mx2 = max(l.mx2, r.mx2);
+			}
+			l.sum += r.sum;
+			return l;
+		}
+
+		node_container() : mx(0), mxc(1), mx2(-1), sum(0) {}
+	} nod;
+
+	struct lazy_container
+	{
+		int x;
+
+		inline bool operator()() // has lazy
+		{
+			return x != oo;
+		}
+
+		lazy_container(int x = oo) : x(x) {}
+	} lazy;
+
+	inline void apply(int l, int r, const lazy_container &p, int szl) // apply lazy
+	{
+		if (!break_condition(p))
+		{
+			nod.sum -= (ll)(nod.mx - p.x) * nod.mxc;
+			nod.mx = p.x;
+			lazy.x = p.x;
+		}
+	}
+
+	inline bool tag_condition(const lazy_container &p)
+	{
+		return nod.mx2 < p.x;
+	}
+
+	inline bool break_condition(const lazy_container &p)
+	{
+		return nod.mx <= p.x;
 	}
 };
