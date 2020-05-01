@@ -44,22 +44,39 @@ private:
 	vector<uint32> rank_table;
 };
 
+struct bit_array : vector<int>
+{
+	bit_array() = default;
+	bit_array(uint32 n, bool one = false) : vector<int>(n, one) {}
+	void build() { partial_sum(this->begin(), this->end(), this->begin()); }
+	// Return number of bits equal to one in range [0, pos)
+	inline uint32 rank(uint32 pos, bool one = true) const
+	{
+		uint32 sum = (pos >= 1 ? (*this)[pos - 1] : 0);
+		return one ? sum : pos - sum;
+	}
+	inline void set_bit(uint32 pos, bool one = true) { (*this)[pos] = one; }
+	inline bool get_bit(uint32 pos) const { return (*this)[pos] - (pos ? (*this)[pos - 1] : 0); }
+};
+
+template<typename T>
 struct wavelet_matrix
 {
+	using uT = typename make_unsigned<T>::type;
 	wavelet_matrix() = default;
-	wavelet_matrix(const vector<uint32> &data, uint32 m_level = 0)
+	wavelet_matrix(const vector<T> &data, uint32 m_level = 0)
 	{
 		n = data.size();
 		max_value = (n == 0 ? 0UL : *max_element(data.begin(), data.end()));
 		if (m_level == 0)
-			do { ++m_level; } while ((1UL << m_level) <= max_value);
+			do { ++m_level; } while ((static_cast<uT>(1) << m_level) <= max_value);
 		max_level = m_level;
 		bit_arrays.assign(max_level, bit_array(n));
 		zero_cnt.assign(max_level, 0UL);
-		vector<uint32> level = data, next_level = level;
+		vector<T> level = data, next_level = level;
 		for (uint32 lvl = 0; lvl < max_level; ++lvl)
 		{
-			uint32 mask = 1UL << (max_level - lvl - 1);
+			uT mask = static_cast<uT>(1) << (max_level - lvl - 1);
 			uint32 &zeros = zero_cnt[lvl] = 0;
 			for (uint32 i = 0; i < n; ++i)
 				zeros += (level[i] & mask) == 0;
@@ -74,21 +91,21 @@ struct wavelet_matrix
 		}
 	}
 	// Return the element at position pos
-	uint32 operator[](uint32 pos) const
+	T operator[](uint32 pos) const
 	{
-		uint32 value = 0;
+		T value = 0;
 		for (uint32 lvl = 0; lvl < max_level; ++lvl)
 		{
 			const bit_array &ba = bit_arrays[lvl];
 			const bool one = ba.get_bit(pos);
-			value = value << 1 | (one);
+			value = value << 1 | one;
 			pos = ba.rank(pos, one);
 			if (one) pos += zero_cnt[lvl];
 		}
 		return value;
 	}
 	// Compute the frequency of characters c' < c, c'= c, and c' > c, in the subarray [begin_pos...end_pos)
-	tuple<uint32, uint32, uint32> rank_all(uint32 c, uint32 begin_pos, uint32 end_pos) const
+	tuple<int, int, int> rank_all(T c, uint32 begin_pos, uint32 end_pos) const
 	{
 		if (c > max_value) return make_tuple(end_pos - begin_pos, 0UL, 0UL);
 		uint32 more_and_less[2] = {0};
@@ -106,15 +123,15 @@ struct wavelet_matrix
 	}
 	// Return the k-th smallest value in the subarray [begin_pos, end_pos)
 	// k should be smaller than end_pos - beg_pos
-	uint32 quantile(uint32 begin_pos, uint32 end_pos, uint32 k)
+	T quantile(uint32 begin_pos, uint32 end_pos, uint32 k) const
 	{
-		uint32 value = 0;
+		T value = 0;
 		for (uint32 lvl = 0; lvl < max_level; ++lvl)
 		{
 			const bit_array &ba = bit_arrays[lvl];
 			const uint32 zeros = ba.rank(end_pos, 0) - ba.rank(begin_pos, 0);
 			const bool one = k >= zeros;
-			value = value << 1 | (one);
+			value = value << 1 | one;
 			begin_pos = ba.rank(begin_pos, one);
 			end_pos = ba.rank(end_pos, one);
 			if (one) begin_pos += zero_cnt[lvl], end_pos += zero_cnt[lvl], k -= zeros;
