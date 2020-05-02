@@ -10,7 +10,7 @@ typedef complex<ll> point;
 #define F first
 #define S second
 
-#include "../../src/data_structures/bit_array.cpp"
+#include "../../src/data_structures/custom_array.cpp"
 
 int main()
 {
