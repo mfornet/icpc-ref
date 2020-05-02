@@ -20,7 +20,7 @@ struct bit_array
 	bit_array(vector<int> d) : c(td), b(accumulate(d.begin(), d.end(), l, multiplies<int>()) / 64 + 1), mask(64)
 	{
 		for (int i = td-1, s = 1; i >= 0; c[i] = s, s *= d[i], --i);
-		for (int i = 1; i < 64; mask[i] = (1LL<<i)-1, ++i);
+		for (int i = 1; i < 64; mask[i] = (1ULL<<i)-1, ++i);
 	}
 
 	inline ull get(idx &e) { addr; _get; return r; }

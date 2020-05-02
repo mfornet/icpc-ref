@@ -41,4 +41,3 @@ ll linear_recurrence(vector<ll> a, vector<ll> x, ll k)
 		ans += c[i] * x[i];
 	return ans;
 }
-
