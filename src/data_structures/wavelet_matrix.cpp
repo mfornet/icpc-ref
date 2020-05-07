@@ -1,65 +1,6 @@
 using uint32 = uint32_t;
 
-struct bit_array
-{
-	bit_array() = default;
-	bit_array(uint32 n, bool one = false)
-	{
-		blocks.assign((n + 31) / 32, one ? 0xffffffffUL : 0);
-		rank_table.assign(blocks.size(), 0UL);
-	}
-	void build()
-	{
-		uint32 sum = 0;
-		for (size_t i = 0; i < rank_table.size(); ++i)
-			rank_table[i] = (sum += bit_count(blocks[i]));
-	}
-	// Return number of bits equal to one in range [0, pos)
-	uint32 rank(uint32 pos, bool one = true) const
-	{
-		uint32 block = pos >> 5;
-		uint32 bit = pos & 31;
-		uint32 sum = (block >= 1 ? rank_table[block - 1] : 0) + bit_count(blocks[block] & ((1UL << bit) - 1));
-		return one ? sum : pos - sum;
-	}
-	void set_bit(uint32 pos, bool one = true)
-	{
-		uint32 block = pos >> 5;
-		uint32 bit = pos & 31;
-		if (one) blocks[block] |= 1UL << bit;
-		else blocks[block] &= ~(1ULL << bit);
-	}
-	bool get_bit(uint32 pos) const { return blocks[pos >> 5] >> (pos & 31) & 1; }
-private:
-	// Return number of set bits of x
-	static inline uint32 bit_count(uint32 x)
-	{
-		x -=  (x >> 1) & 0x55555555UL;                        // 0-2 in 2 bits
-		x  = ((x >> 2) & 0x33333333UL) + (x & 0x33333333UL);  // 0-4 in 4 bits
-		x  = ((x >> 4) + x) & 0x0f0f0f0fUL;                   // 0-8 in 8 bits
-		x *= 0x01010101UL;
-		return x >> 24;
-	}
-	vector<uint32> blocks;
-	vector<uint32> rank_table;
-};
-
-struct bit_array : vector<int>
-{
-	bit_array() = default;
-	bit_array(uint32 n, bool one = false) : vector<int>(n, one) {}
-	void build() { partial_sum(this->begin(), this->end(), this->begin()); }
-	// Return number of bits equal to one in range [0, pos)
-	inline uint32 rank(uint32 pos, bool one = true) const
-	{
-		uint32 sum = (pos >= 1 ? (*this)[pos - 1] : 0);
-		return one ? sum : pos - sum;
-	}
-	inline void set_bit(uint32 pos, bool one = true) { (*this)[pos] = one; }
-	inline bool get_bit(uint32 pos) const { return (*this)[pos] - (pos ? (*this)[pos - 1] : 0); }
-};
-
-template<typename T>
+template<typename T, class bit_array>
 struct wavelet_matrix
 {
 	using uT = typename make_unsigned<T>::type;
@@ -144,4 +85,63 @@ private:
 	uint32 max_value;
 	vector<bit_array> bit_arrays;
 	vector<uint32> zero_cnt;
+};
+
+struct bit_array
+{
+	bit_array() = default;
+	bit_array(uint32 n, bool one = false)
+	{
+		blocks.assign((n + 31) / 32, one ? 0xffffffffUL : 0);
+		rank_table.assign(blocks.size(), 0UL);
+	}
+	void build()
+	{
+		uint32 sum = 0;
+		for (size_t i = 0; i < rank_table.size(); ++i)
+			rank_table[i] = (sum += bit_count(blocks[i]));
+	}
+	// Return number of bits equal to one in range [0, pos)
+	uint32 rank(uint32 pos, bool one = true) const
+	{
+		uint32 block = pos >> 5;
+		uint32 bit = pos & 31;
+		uint32 sum = (block >= 1 ? rank_table[block - 1] : 0) + bit_count(blocks[block] & ((1UL << bit) - 1));
+		return one ? sum : pos - sum;
+	}
+	void set_bit(uint32 pos, bool one = true)
+	{
+		uint32 block = pos >> 5;
+		uint32 bit = pos & 31;
+		if (one) blocks[block] |= 1UL << bit;
+		else blocks[block] &= ~(1ULL << bit);
+	}
+	bool get_bit(uint32 pos) const { return blocks[pos >> 5] >> (pos & 31) & 1; }
+private:
+	// Return number of set bits of x
+	static inline uint32 bit_count(uint32 x)
+	{
+		x -=  (x >> 1) & 0x55555555UL;                        // 0-2 in 2 bits
+		x  = ((x >> 2) & 0x33333333UL) + (x & 0x33333333UL);  // 0-4 in 4 bits
+		x  = ((x >> 4) + x) & 0x0f0f0f0fUL;                   // 0-8 in 8 bits
+		x *= 0x01010101UL;
+		return x >> 24;
+	}
+	vector<uint32> blocks;
+	vector<uint32> rank_table;
+};
+
+struct bit_array_vec : vector<int>
+{
+	bit_array_vec() = default;
+	bit_array_vec(uint32 n, bool one = false) : vector<int>(n, one) {}
+	void build() { partial_sum(this->begin(), this->end(), this->begin()); }
+	// Return number of bits equal to one in range [0, pos)
+	inline uint32 rank(uint32 pos, bool one = true) const
+	{
+		uint32 sum = (pos >= 1 ? (*this)[pos - 1] : 0);
+		return one ? sum : pos - sum;
+	}
+	inline void set_bit(uint32 pos, bool one = true) { (*this)[pos] = one; }
+	inline bool get_bit(uint32 pos) const { return (*this)[pos] - (pos ? (*this)[pos - 1] : 0); }
 };
