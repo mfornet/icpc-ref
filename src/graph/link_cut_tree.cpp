@@ -1,102 +1,168 @@
-/**
- * Author: Simon Lindholm
- * Date: 2016-07-25
- * Source: https://github.com/ngthanhtrung23/ACM_Notebook_new/blob/master/DataStructure/LinkCut.h
- * Description: Represents a forest of unrooted trees. You can add and remove
- * edges (as long as the result is still a forest), and check whether
- * two nodes are in the same tree.
- * Time: All operations take amortized O(\log N).
- * Status: Stress-tested a bit for N <= 20
- */
-#pragma once
+template<class node>
+struct link_cut_tree
+{
+	bool connected(node* u, node* v) { return lca(u, v) != NULL; }
 
-struct Node { // Splay tree. Root's pp contains tree's parent.
-	Node *p = 0, *pp = 0, *c[2];
-	bool flip = 0;
-	Node() { c[0] = c[1] = 0; fix(); }
-	void fix() {
-		if (c[0]) c[0]->p = this;
-		if (c[1]) c[1]->p = this;
-		// (+ update sum of subtree elements etc. if wanted)
+	int depth(node* u)
+	{
+		access(u); return get_sz(u->ch[0]);
 	}
-	void push_flip() {
-		if (!flip) return;
-		flip = 0; swap(c[0], c[1]);
-		if (c[0]) c[0]->flip ^= 1;
-		if (c[1]) c[1]->flip ^= 1;
+
+	node* get_root(node* u)
+	{
+		access(u);
+		while (u->ch[0]) u = u->ch[0], push(u);
+		return access(u), u;
 	}
-	int up() { return p ? p->c[1] == this : -1; }
-	void rot(int i, int b) {
-		int h = i ^ b;
-		Node *x = c[i], *y = b == 2 ? x : x->c[h], *z = b ? y : x;
-		if ((y->p = p)) p->c[up()] = y;
-		c[i] = z->c[i ^ 1];
-		if (b < 2) {
-			x->c[h] = y->c[h ^ 1];
-			z->c[h ^ 1] = b ? x : this;
+
+	node* ancestor(node* u, int k)
+	{
+		k = depth(u) - k;
+		assert(k >= 0);
+		for (; ; u->push())
+		{
+			int sz = get_sz(u->ch[0]);
+			if (sz == k) return access(u), u;
+			if (sz < k) k -= sz+1, u = u->ch[1];
+			else u = u->ch[0];
 		}
-		y->c[i ^ 1] = b ? this : x;
-		fix(); x->fix(); y->fix();
-		if (p) p->fix();
-		swap(pp, y->pp);
+		assert(0);
 	}
-	void splay() { /// Splay this up to the root. Always finishes without flip set.
-		for (push_flip(); p; ) {
-			if (p->p) p->p->push_flip();
-			p->push_flip(); push_flip();
-			int c1 = up(), c2 = p->up();
-			if (c2 == -1) p->rot(c1, 2);
-			else p->p->rot(c2, c1 != c2);
+
+	node* lca(node* u, node* v)
+	{
+		if (u == v) return u;
+		access(u); access(v);
+		if (!u->p) return NULL;
+		u->splay(); return u->p ?: u;
+	}
+
+	void link(node* u, node* v) // make u parent of v
+	{
+		assert(!connected(u, v));
+		make_root(v);
+		access(u); set_link(v, u, 0); v->update();
+	}
+
+	void cut(node* u) // cut u from its parent
+	{
+		access(u);
+		u->ch[0]->p = NULL;
+		u->ch[0] = NULL;
+		u->update();
+	}
+
+	void cut(node* u, node* v)
+	{
+		//make_root(u); access(v); cut(v);
+		cut(depth(u) > depth(v) ? u : v);
+	}
+
+	void make_root(node* u)
+	{
+		access(u);
+		u->rev ^= 1;
+		access(u);
+		assert(!u->ch[0] && !u->ch[1]);
+	}
+
+	void access(node *u)
+	{
+		for (node* v = u, *pre = NULL; v; v = v->p)
+		{
+			v->splay(); // now switch virtual children
+			//if (pre) v->vsub -= pre->sub;
+			//if (v->ch[1]) v->vsub += v->ch[1]->sub;
+			v->ch[1] = pre; v->update(); pre = v;
+		}
+		u->splay(); assert(!u->ch[1]); // right subtree is empty
+	}
+
+	node* operator[](int i) { return &data[i]; }
+	int operator[](node* i) { return i - &data[0]; }
+
+	vector<node> data;
+	link_cut_tree(int n) : data(n) {}
+};
+
+template<typename pnode>
+struct splay_tree
+{
+	pnode ch[2], p;
+	bool rev;
+	int sz;
+
+	splay_tree() { ch[0] = ch[1] = p = NULL; rev = 0; sz = 1; }
+
+	friend int get_sz(pnode u) { return u ? u->sz : 0; }
+
+	virtual void update()
+	{
+		if (ch[0]) ch[0]->push();
+		if (ch[1]) ch[1]->push();
+		sz = 1 + get_sz(ch[0]) + get_sz(ch[1]);
+	}
+
+	virtual void push()
+	{
+		if (rev)
+		{
+			if (ch[0]) ch[0]->rev ^= 1;
+			if (ch[1]) ch[1]->rev ^= 1;
+			swap(ch[0], ch[1]); rev = 0;
 		}
 	}
-	Node* first() { /// Return the min element of the subtree rooted at this, splayed to the top.
-		push_flip();
-		return c[0] ? c[0]->first() : (splay(), this);
+
+	int dir()
+	{
+		if (!p) return -2;
+		if (p->ch[0] == this) return 0;
+		if (p->ch[1] == this) return 1;
+		return -1;
+	}
+
+	bool is_root() { return dir() < 0; }
+
+	friend void set_link(pnode u, pnode v, int d)
+	{
+		if (v) v->p = u;
+		if (d >= 0) u->ch[d] = v;
+	}
+
+	void rotate()
+	{
+		assert(!is_root());
+		int x = dir(); pnode g = p;
+		set_link(g->p, static_cast<pnode>(this), g->dir());
+		set_link(g, ch[x^1], x);
+		set_link(static_cast<pnode>(this), g, x^1);
+		g->update(); update();
+	}
+
+	void splay()
+	{
+		while (!is_root() && !p->is_root())
+		{
+			p->p->push(), p->push(), push();
+			dir() == p->dir() ? p->rotate() : rotate();
+			rotate();
+		}
+		if (!is_root()) p->push(), push(), rotate();
+		push();
 	}
 };
 
-struct LinkCut {
-	vector<Node> node;
-	LinkCut(int N) : node(N) {}
+struct node : splay_tree<node*>
+{
+	node() : splay_tree() {  }
 
-	void link(int u, int v) { // add an edge (u, v)
-		assert(!connected(u, v));
-		make_root(&node[u]);
-		node[u].pp = &node[v];
+	void update() override
+	{
+		splay_tree::update();
 	}
-	void cut(int u, int v) { // remove an edge (u, v)
-		Node *x = &node[u], *top = &node[v];
-		make_root(top); x->splay();
-		assert(top == (x->pp ?: x->c[0]));
-		if (x->pp) x->pp = 0;
-		else {
-			x->c[0] = top->p = 0;
-			x->fix();
-		}
+
+	void push() override
+	{
+		splay_tree::push();
 	}
-	bool connected(int u, int v) { // are u, v in the same tree?
-		Node* nu = access(&node[u])->first();
-		return nu == access(&node[v])->first();
-	}
-	void make_root(Node* u) { /// Move u to root of represented tree.
-		access(u);
-		u->splay();
-		if(u->c[0]) {
-			u->c[0]->p = 0;
-			u->c[0]->flip ^= 1;
-			u->c[0]->pp = u;
-			u->c[0] = 0;
-			u->fix();
-		}
-	}
-	Node* access(Node* u) { /// Move u to root aux tree. Return the root of the root aux tree.
-		u->splay();
-		while (Node* pp = u->pp) {
-			pp->splay(); u->pp = 0;
-			if (pp->c[1]) {
-				pp->c[1]->p = 0; pp->c[1]->pp = pp; }
-			pp->c[1] = u; pp->fix(); u = pp;
-		}
-		return u;
-	}
-}; 
+};
