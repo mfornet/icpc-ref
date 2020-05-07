@@ -3,19 +3,16 @@ struct link_cut_tree
 {
 	bool connected(node* u, node* v) { return lca(u, v) != NULL; }
 
-	int depth(node* u)
-	{
-		access(u); return get_sz(u->ch[0]);
-	}
+	int depth(node* u) { access(u); return get_sz(u->ch[0]); }
 
-	node* get_root(node* u)
+	node* get_root(node* u) // get root of LCT component
 	{
 		access(u);
-		while (u->ch[0]) u = u->ch[0], push(u);
+		while (u->ch[0]) u = u->ch[0], u->push();
 		return access(u), u;
 	}
 
-	node* ancestor(node* u, int k)
+	node* ancestor(node* u, int k) // get k-th parent on path to root
 	{
 		k = depth(u) - k;
 		assert(k >= 0);
@@ -52,13 +49,13 @@ struct link_cut_tree
 		u->update();
 	}
 
-	void cut(node* u, node* v)
+	void cut(node* u, node* v) // if u, v adj in tree
 	{
 		//make_root(u); access(v); cut(v);
 		cut(depth(u) > depth(v) ? u : v);
 	}
 
-	void make_root(node* u)
+	void make_root(node* u) // make u root of LCT component
 	{
 		access(u);
 		u->rev ^= 1;
@@ -66,7 +63,7 @@ struct link_cut_tree
 		assert(!u->ch[0] && !u->ch[1]);
 	}
 
-	void access(node *u)
+	void access(node *u) // puts u on the preferred path, splay (right subtree is empty)
 	{
 		for (node* v = u, *pre = NULL; v; v = v->p)
 		{
@@ -75,7 +72,7 @@ struct link_cut_tree
 			//if (v->ch[1]) v->vsub += v->ch[1]->sub;
 			v->ch[1] = pre; v->update(); pre = v;
 		}
-		u->splay(); assert(!u->ch[1]); // right subtree is empty
+		u->splay(); assert(!u->ch[1]);
 	}
 
 	node* operator[](int i) { return &data[i]; }
@@ -115,10 +112,10 @@ struct splay_tree
 
 	int dir()
 	{
-		if (!p) return -2;
-		if (p->ch[0] == this) return 0;
-		if (p->ch[1] == this) return 1;
-		return -1;
+		if (!p) return -2; // root of LCT component
+		if (p->ch[0] == this) return 0; // left child
+		if (p->ch[1] == this) return 1; // right child
+		return -1; // root of current splay tree
 	}
 
 	bool is_root() { return dir() < 0; }
@@ -129,7 +126,7 @@ struct splay_tree
 		if (d >= 0) u->ch[d] = v;
 	}
 
-	void rotate()
+	void rotate() // assume p and p->p propagated
 	{
 		assert(!is_root());
 		int x = dir(); pnode g = p;
@@ -139,7 +136,7 @@ struct splay_tree
 		g->update(); update();
 	}
 
-	void splay()
+	void splay() // bring this to top of splay tree
 	{
 		while (!is_root() && !p->is_root())
 		{
@@ -154,6 +151,8 @@ struct splay_tree
 
 struct node : splay_tree<node*>
 {
+	using splay_tree::ch;
+
 	node() : splay_tree() {  }
 
 	void update() override
@@ -161,7 +160,7 @@ struct node : splay_tree<node*>
 		splay_tree::update();
 	}
 
-	void push() override
+	void push() override // make sure push fix the node (call update if necessary)
 	{
 		splay_tree::push();
 	}
