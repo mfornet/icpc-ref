@@ -29,6 +29,8 @@ struct node2 : splay_tree<node2*>
 		if (ch[1]) tie(c, d) = make_pair(ch[1]->c * c % mod, (ch[1]->c * d + ch[1]->d) % mod);
 	}
 
+	void update_vsub(node2* v, bool add) {}
+
 	void push() override
 	{
 		if (splay_tree::rev)

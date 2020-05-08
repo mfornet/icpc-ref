@@ -67,9 +67,9 @@ struct link_cut_tree
 	{
 		for (node* v = u, *pre = NULL; v; v = v->p)
 		{
-			v->splay(); // now switch virtual children
-			//if (pre) v->vsub -= pre->sub;
-			//if (v->ch[1]) v->vsub += v->ch[1]->sub;
+			v->splay(); // now update virtual children
+			if (pre) v->update_vsub(pre, false);
+			if (v->ch[1]) v->update_vsub(v->ch[1], true);
 			v->ch[1] = pre; v->update(); pre = v;
 		}
 		u->splay(); assert(!u->ch[1]);
@@ -152,15 +152,24 @@ struct splay_tree
 struct node : splay_tree<node*>
 {
 	using splay_tree::ch;
+	ll x, sub, vsub;
 
-	node() : splay_tree() {  }
+	node() : splay_tree() { sub = vsub = 0; }
 
 	void update() override
 	{
 		splay_tree::update();
+		sub = x + vsub;
+		sub += (ch[0] ? ch[0]->sub : 0);
+		sub += (ch[1] ? ch[1]->sub : 0);
 	}
 
-	void push() override // make sure push fix the node (call update if necessary)
+	void update_vsub(node* v, bool add)
+	{
+		vsub += (add ? +1 : -1) * v->sub;
+	}
+
+	void push() override // make sure push fix the node (don't call splay_tree::update)
 	{
 		splay_tree::push();
 	}
