@@ -3,6 +3,7 @@
 	       ** change the return of query and query_up **
 	       ** on query_up make sure 'ans' contains a neutral value for the desired operation(sum by default) **
 	       ** for operations over the edges change excl_l to true **
+	       ** for updates on subtrees use rootify_rec, nodes in subtree of u are in [pos_u, endpos_u) **
 
 	Complexity: O(n) rootify, O(log n) lca, O(log n * data_structure_cost_of) update and query
 */
@@ -12,7 +13,7 @@ struct heavy_light_decomposition
 {
 	int n;
 	vector<vector<int>> G;
-	vector<int> parent, depth, head, pos;
+	vector<int> parent, depth, head, pos, endpos;
 	data_structure ds;
 	heavy_light_decomposition(int n) :n(n), G(n), parent(n, -1), depth(n), head(n), pos(n), ds(n) {}
 
@@ -20,6 +21,41 @@ struct heavy_light_decomposition
 	{
 		G[u].push_back(v);
 		G[v].push_back(u);
+	}
+
+	void rootify_rec(int r = 0)
+	{
+		vector<int> sz(n, 1);
+		function<void(int)> dfs = [&](int u)
+		{
+			for (auto &v : G[u])
+				if (v != parent[u])
+				{
+					depth[v] = depth[u] + 1;
+					parent[v] = u;
+					dfs(v);
+					sz[u] += sz[v];
+					if (sz[v] > sz[G[u][0]] || G[u][0] == parent[u])
+						swap(v, G[u][0]);
+				}
+		};
+		dfs(r);
+
+		int p = 0;
+		endpos.resize(n);
+		function<void(int)> dfs_hld = [&](int u)
+		{
+			pos[u] = p++;
+			for (auto v : G[u])
+				if (v != parent[u])
+				{
+					head[v] = (v == G[u][0]) ? head[u] : v;
+					dfs_hld(v);
+				}
+			endpos[u] = p;
+		};
+		head[r] = r;
+		dfs_hld(r);
 	}
 
 	void rootify(int r = 0)
