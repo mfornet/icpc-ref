@@ -8,5 +8,3 @@
 	Matroid intersection
 		https://codeforces.com/group/D3omoYNTLF/blog/entry/4645
 		https://github.com/tfg50/Competitive-Programming/tree/master/Biblioteca
-	HLD
-		https://codeforces.com/blog/entry/53170
