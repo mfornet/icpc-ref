@@ -32,6 +32,7 @@
 "tests/math/fast_fourier_transform(very_fast)2.test.cpp": "2020-04-19 09:51:56 -0400",
 "tests/math/fast_fourier_transform.test.cpp": "2020-03-18 17:54:23 -0400",
 "tests/math/fast_fourier_transform2.test.cpp": "2020-03-18 17:54:23 -0400",
+"tests/math/linear_recurrence.test.cpp": "2020-05-23 12:50:06 -0400",
 "tests/math/number_theoretic_transform.test.cpp": "2020-04-26 14:53:15 -0400",
 "tests/number_theory/big_integer_add.test.cpp": "2020-03-22 17:18:18 -0400",
 "tests/number_theory/big_integer_div.test.cpp": "2020-03-22 17:18:18 -0400",
