@@ -19,7 +19,7 @@ int main()
 
 	int n, q;
 	cin >> n >> q;
-	heavy_light_decomposition<segment_tree<node>> hld(n);
+	heavy_light_decomposition<segment_tree<node, seg_lazy>> hld(n);
 	vector<int> a(n);
 	for (auto &i : a) cin >> i;
 	for (int v = 1, u; v < n; ++v)

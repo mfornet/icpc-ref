@@ -1,19 +1,26 @@
-template<class node>
+enum seg_type { seg_not_lazy, seg_lazy, seg_beats };
+template<class node, seg_type type>
 struct segment_tree
 {
-	using node_container = decltype(node().nod);
-	using lazy_container = decltype(node().lazy);
+	using node_container = typename node::node_container;
+	using lazy_container = typename node::lazy_container;
+	#define enable_if(x) template <const bool T = (x), typename enable_if<T, bool>::type = 0>
+	#define enable_if_not(x) template <const bool T = (x), typename enable_if<!T, bool>::type = 0>
 
 private:
+	enable_if(type != seg_not_lazy)
 	inline void push(int x, int b, int e, int m)
 	{
 		if (st[x].lazy())
 		{
-			st[x + 1].apply(b, m, st[x].lazy, 0);
-			st[x + ((m - b) << 1)].apply(m, e, st[x].lazy, m-b);
+			st[x + 1].apply(b, m, st[x].lazy);
+			st[x + ((m - b) << 1)].apply(m, e, st[x].lazy);
 			st[x].lazy = lazy_container();
 		}
 	}
+
+	enable_if_not(type != seg_not_lazy)
+	inline void push(int x, int b, int e, int m) {}
 
 	template<typename RAIter>
 	void build(int x, int b, int e, const RAIter &a)
@@ -32,14 +39,32 @@ private:
 		st[x].nod = st[x + 1].nod + st[y].nod;
 	}
 
+	enable_if_not(type == seg_beats)
 	void update_(int x, int b, int e)
 	{
-		//if (st[x].break_condition(lazy)) return;
-
 		if (lo <= b && e <= hi)
-			//if (st[x].tag_condition(lazy))
 		{
-			st[x].apply(b, e, lazy, b-lo);
+			st[x].apply(b, e, lazy);
+			return;
+		}
+
+		int m = (b + e) >> 1;
+		int y = x + ((m - b) << 1);
+		push(x, b, e, m);
+
+		if (lo < m) update_(x + 1, b, m);
+		if (m < hi) update_(y, m, e);
+		st[x].nod = st[x + 1].nod + st[y].nod;
+	}
+
+	enable_if(type == seg_beats)
+	void update_(int x, int b, int e)
+	{
+		if (st[x].break_condition(lazy)) return;
+
+		if (lo <= b && e <= hi && st[x].tag_condition(lazy))
+		{
+			st[x].apply(b, e, lazy);
 			return;
 		}
 
@@ -176,7 +201,7 @@ struct node // arithmetic progression
 		lazy_container(bool clear = 0, ll first = 0, ll dif = 0) : clear(clear), first(first), dif(dif) {}
 	} lazy;
 
-	inline void apply(int l, int r, const lazy_container &p, int szl) // apply lazy
+	inline void apply(int l, int r, lazy_container &p) // apply lazy
 	{
 		if (p.clear)
 		{
@@ -185,15 +210,15 @@ struct node // arithmetic progression
 			lazy.clear = 1;
 		}
 		int sz = r-l;
-		ll first = p.first + szl * p.dif;
-		nod.x += first * sz + ((ll)sz-1) * sz / 2 * p.dif;
-		lazy.first += first;
+		nod.x += p.first * sz + ((ll)sz-1) * sz / 2 * p.dif;
+		lazy.first += p.first;
 		lazy.dif += p.dif;
+		p.first += sz * p.dif;
 	}
 };
 
-// ** UNCOMMENT lines in update_ ** Tested: https://vjudge.net/problem/HDU-5306
-struct beats // segment tree beats (update ai = min(ai, x), query for max or sum)
+// Tested: https://vjudge.net/problem/HDU-5306
+struct beats // segment tree beats (update a_i = min(a_i, x), query for max or sum)
 {
 	const static int oo = numeric_limits<int>::max();
 
@@ -244,7 +269,7 @@ struct beats // segment tree beats (update ai = min(ai, x), query for max or sum
 		lazy_container(int x = oo) : x(x) {}
 	} lazy;
 
-	inline void apply(int l, int r, const lazy_container &p, int szl) // apply lazy
+	inline void apply(int l, int r, lazy_container &p) // apply lazy
 	{
 		if (!break_condition(p))
 		{
