@@ -1,527 +1,466 @@
-//
-// Polynomial with integer coefficient (mod M)
-//
-// Implemented routines:
-//   1) addition
-//   2) subtraction
-//   3) multiplication (naive O(n^2), Karatsuba O(n^1.5..), FFT O(n log n))
-//   4) division (naive O(n^2), Newton O(M(n)))
-//   5) gcd
-//   6) multipoint evaluation (divide conquer: O(M(n) log |X|))
-//   7) interpolation (naive O(n^2), divide conquer O(M(n) log n))
-//   8) polynomial shift (naive, fast)
-//
-//   *) n! mod M in O(n^{1/2} log n) time
-//
-//
-
-typedef long long ll;
-
-ll add(ll a, ll b, ll M)
-{
-	return (a += b) >= M ? a - M : a;
-}
-
-ll sub(ll a, ll b, ll M)
-{
-	return (a -= b) < 0 ? a + M : a;
-}
-
-ll mul(ll a, ll b, ll M)
-{
-	ll q = (long double) a * (long double) b / (long double) M;
-	ll r = a * b - q * M;
-	return (r + 5 * M) % M;
-}
-
-// solve b x == a (mod M)
-ll div(ll a, ll b, ll M)
-{
-	ll u = 1, x = 0, s = b, t = M;
-	while (s)
-	{
-		ll q = t / s;
-		swap(x -= u * q, u);
-		swap(t -= s * q, s);
-	}
-	if (a % t)
-		return -1; // infeasible
-	return mul(x < 0 ? x + M : x, a / t, M); // b (xa/t) == a (mod M)
-}
-ll pow(ll a, ll b, ll M)
-{
-	ll x = 1;
-	for (; b > 0; b >>= 1)
-	{
-		if (b & 1)
-			x = (a * x) % M;
-		a = (a * a) % M;
-	}
-	return x;
-}
-
-// p(x) = p[0] + p[1] x + ... + p[n-1] x^n-1
-// assertion: p.back() != 0
-typedef vector<ll> poly;
-
-ostream& operator<<(ostream &os, const poly &p)
-{
-	bool head = true;
-	for (int i = 0; i < p.size(); ++i)
-	{
-		if (p[i] == 0)
-			continue;
-		if (!head)
-			os << " + ";
-		os << p[i];
-		head = false;
-		if (i >= 1)
-			os << " x";
-		if (i >= 2)
-			os << "^" << i;
-	}
-	return os;
-}
-
-poly add(poly p, const poly &q, ll M)
-{
-	if (p.size() < q.size())
-		p.resize(q.size());
-	for (int i = 0; i < q.size(); ++i)
-		p[i] = add(p[i], q[i], M);
-	while (!p.empty() && !p.back())
-		p.pop_back();
-	return p;
-}
-
-poly sub(poly p, const poly &q, ll M)
-{
-	if (p.size() < q.size())
-		p.resize(q.size());
-	for (int i = 0; i < q.size(); ++i)
-		p[i] = sub(p[i], q[i], M);
-	while (!p.empty() && !p.back())
-		p.pop_back();
-	return p;
-}
-
-// naive multiplication in O(n^2)
-poly mul_n(const poly &p, const poly &q, ll M)
-{
-	if (p.empty() || q.empty())
-		return {};
-	poly r(p.size() + q.size() - 1);
-	for (int i = 0; i < p.size(); ++i)
-		for (int j = 0; j < q.size(); ++j)
-			r[i + j] = add(r[i + j], mul(p[i], q[j], M), M);
-	while (!r.empty() && !r.back())
-		r.pop_back();
-	return r;
-}
-
-// naive division (long division) in O(n^2)
-pair<poly, poly> divmod_n(poly p, poly q, ll M)
-{
-	poly u(p.size() - q.size() + 1);
-	ll inv = div(1, q.back(), M);
-	for (int i = u.size() - 1; i >= 0; --i)
-	{
-		u[i] = mul(p.back(), inv, M);
-		for (int j = 0; j < q.size(); ++j)
-			p[j + p.size() - q.size()] = sub(p[j + p.size() - q.size()],
-					mul(q[j], u[i], M), M);
-		p.pop_back();
-	}
-	return {u, p};
-}
-
-// Karatsuba multiplication; this works correctly for M in [long long]
-poly mul_k(poly p, poly q, ll M)
-{
-	int n = max(p.size(), q.size()), m = p.size() + q.size() - 1;
-	for (int k : { 1, 2, 4, 8, 16 })
-		n |= (n >> k);
-	++n; // n is power of two
-	p.resize(n);
-	q.resize(n);
-	poly r(6 * n);
-	function<void(ll*, ll*, int, ll*)> rec = 
-		[&](ll *p0, ll *q0, int n, ll *r0)
-	{
-		if (n <= 4)
-		{
-			// 4 is the best threshold
-			fill_n(r0, 2*n, 0);
-			for (int i = 0; i < n; ++i)
-				for (int j = 0; j < n; ++j)
-					r0[i+j] = add(r0[i+j], mul(p0[i], q0[j], M), M);
-			return;
-		}
-		ll *p1=p0+n/2,*q1=q0+n/2,*r1=r0+n/2,*r2=r0+n,
-				*u=r0+5*n,*v=u+n/2,*w=r0+2*n;
-		for (int i = 0; i < n/2; ++i)
-		{
-			u[i] = add(p0[i], p1[i], M);
-			v[i] = add(q0[i], q1[i], M);
-		}
-		rec(p0, q0, n/2, r0);
-		rec(p1, q1, n/2, r2);
-		rec( u, v, n/2, w);
-		for (int i = 0; i < n; ++i) 
-			w[i] = sub(w[i], add(r0[i], r2[i], M), M);
-		for (int i = 0; i < n; ++i) 
-			r1[i] = add(r1[i], w[i], M);
-	};
-	rec(&p[0], &q[0], n, &r[0]);
-	r.resize(m);
-	return r;
-}
-
-// FFT-based multiplication: this works correctly for M in [int]
-// assume: size of a/b is power of two, mod is predetermined
-template<int mod, int sign>
-void fmt(vector<ll>& x)
-{
-	const int n = x.size();
-	int h = pow(3, (mod - 1) / n, mod);
-	if (sign < 0)
-		h = div(1, h, mod);
-	for (int i = 0, j = 1; j < n - 1; ++j)
-	{
-		for (int k = n >> 1; k > (i ^= k); k >>= 1);
-		if (j < i) swap(x[i], x[j]);
-	}
-	for (int m = 1; m < n; m *= 2)
-	{
-		ll w = 1, wk = pow(h, n / (2 * m), mod);
-		for (int i = 0; i < m; ++i)
-		{
-			for (int s = i; s < n; s += 2 * m)
-			{
-				ll u = x[s], d = x[s + m] * w % mod;
-				if ((x[s] = u + d) >= mod)
-					x[s] -= mod;
-				if ((x[s + m] = u - d) < 0)
-					x[s + m] += mod;
-			}
-			w = w * wk % mod;
-		}
-	}
-	if (sign < 0)
-	{
-		ll inv = div(1, n, mod);
-		for (auto &a : x)
-			a = a * inv % mod;
-	}
-}
-
-// assume: size of a/b is power of two, mod is predetermined
-template<int mod>
-vector<ll> conv(vector<ll> a, vector<ll> b)
-{
-	fmt<mod, +1>(a);
-	fmt<mod, +1>(b);
-	for (int i = 0; i < a.size(); ++i)
-		a[i] = a[i] * b[i] % mod;
-	fmt<mod, -1>(a);
+template<typename T>
+vector<T>& operator+=(vector<T>& a, const vector<T>& b) {
+	if (a.size() < b.size())
+		a.resize(b.size());
+	for (int i = 0; i < (int)b.size(); ++i)
+		a[i] += b[i];
 	return a;
 }
 
-// general convolution where mod < 2^31.
-vector<ll> conv(vector<ll> a, vector<ll> b, ll mod)
-{
-	int n = a.size() + b.size() - 1;
-	for (int k : { 1, 2, 4, 8, 16 })
-		n |= (n >> k);
-	++n;
-	a.resize(n);
+template<typename T>
+vector<T> operator+(vector<T> a, const vector<T>& b) {
+	return a += b;
+}
+
+template<typename T>
+vector<T>& operator-=(vector<T>& a, const vector<T>& b) {
+	if (a.size() < b.size())
+		a.resize(b.size());
+	for (int i = 0; i < (int)b.size(); ++i)
+		a[i] -= b[i];
+	return a;
+}
+
+template<typename T>
+vector<T> operator-(vector<T> a, const vector<T>& b) {
+	return a -= b;
+}
+
+template<typename T>
+vector<T> operator-(vector<T> a) {
+	for (int i = 0; i < (int)a.size(); ++i)
+		a[i] = -a[i];
+	return a;
+}
+
+template<typename T>
+vector<T> operator*(const vector<T>& a, const vector<T>& b) {
+	if (a.empty() || b.empty())
+		return {};
+
+	if (min(a.size(), b.size()) < 150) {
+		vector<T> c(a.size() + b.size() - 1, 0);
+		for (int i = 0; i < (int)a.size(); ++i)
+			for (int j = 0; j < (int)b.size(); ++j)
+				c[i + j] += a[i] * b[j];
+
+		return c;
+	}
+
+	vector<int> a_int(a.size()), b_int(b.size());
+	for (int i = 0; i < (int)a.size(); ++i)
+			a_int[i] = static_cast<int>(a[i]);
+	for (int i = 0; i < (int)b.size(); ++i)
+			b_int[i] = static_cast<int>(b[i]);
+
+	vector<int> c_int = fft::convolve(a_int, b_int, T::mod);
+	vector<T> c(c_int.size());
+	for (int i = 0; i < (int)c.size(); ++i)
+			c[i] = c_int[i];
+	return c;
+}
+
+template<typename T>
+vector<T>& operator*=(vector<T>& a, const vector<T>& b) {
+	return a = a * b;
+}
+
+template<typename T>
+vector<T> inverse(const vector<T>& a) {
+	assert(!a.empty());
+	int n = (int)a.size();
+	vector<T> b = {1 / a[0]};
+	while ((int)b.size() < n) {
+		vector<T> a_cut(a.begin(), a.begin() + min(a.size(), b.size() << 1));
+		vector<T> x = b * b * a_cut;
+		b.resize(b.size() << 1);
+		for (int i = (int)b.size() >> 1; i < (int)min(x.size(), b.size()); ++i)
+			b[i] = -x[i];
+	}
 	b.resize(n);
-	const int A = 167772161, B = 469762049, 
-            C = 1224736769, D = (ll) (A) * B % mod;
-	vector<ll> x = conv<A>(a, b), y = conv<B>(a, b), z = conv<C>(a, b);
-	for (int i = 0; i < x.size(); ++i)
-	{
-		ll X = (y[i] - x[i]) * 104391568;
-		if ((X %= B) < 0)
-			X += B;
-		ll Y = (z[i] - (x[i] + A * X) % C) * 721017874;
-		if ((Y %= C) < 0)
-			Y += C;
-		x[i] += A * X + D * Y;
-		if ((x[i] %= mod) < 0)
-			x[i] += mod;
+	return b;
+}
+
+template<typename T>
+vector<T>& operator/=(vector<T>& a, vector<T> b) {
+	int n = (int)a.size();
+	int m = (int)b.size();
+	if (n < m) {
+		a.clear();
+	} else {
+		reverse(a.begin(), a.end());
+		reverse(b.begin(), b.end());
+		b.resize(n - m + 1);
+		a *= inverse(b);
+		a.erase(a.begin() + n - m + 1, a.end());
+		reverse(a.begin(), a.end());
 	}
-	x.resize(n);
-	return x;
+	return a;
 }
 
-poly mul(poly p, poly q, ll M)
-{
-	poly pq = conv(p, q, M);
-	pq.resize(p.size() + q.size() - 1);
-	while (!pq.empty() && !pq.back())
-		pq.pop_back();
-	return pq;
+template<typename T>
+vector<T> operator/(vector<T> a, const vector<T>& b) {
+	return a /= b;
 }
 
-// Newton division: O(M(n)); M is the complexity of multiplication
-// fast when FFT multiplication is used
-//
-// Note: complexity = M(n) + M(n/2) + M(n/4) + ... <= 2 M(n).
-pair<poly, poly> divmod(poly p, poly q, ll M)
-{
-	if (p.size() < q.size())
-		return {{}, p};
-	reverse(p.begin(), p.end());
-	reverse(q.begin(), q.end());
-	poly t = { div(1, q[0], M) };
-	if (t[0] < 0)
-		return {{},{}}; // infeasible
-	for (int k = 1; k <= 2 * (p.size() - q.size() + 1); k *= 2)
-	{
-		poly s = mul(mul(t, q, M), t, M);
-		t.resize(k);
-		for (int i = 0; i < k; ++i)
-			t[i] = sub(2 * t[i], s[i], M);
+template<typename T>
+vector<T>& operator%=(vector<T>& a, const vector<T>& b) {
+	int n = (int)a.size();
+	int m = (int)b.size();
+	if (n >= m) {
+		vector<T> c = (a / b) * b;
+		a.resize(m - 1);
+		for (int i = 0; i < m - 1; ++i)
+			a[i] -= c[i];
 	}
-	t.resize(p.size() - q.size() + 1);
-	t = mul(t, p, M);
-	t.resize(p.size() - q.size() + 1);
-	reverse(t.begin(), t.end());
-	reverse(p.begin(), p.end());
-	reverse(q.begin(), q.end());
-	while (!t.empty() && !t.back())
-		t.pop_back();
-	return {t, sub(p, mul(q, t, M), M)};
+	return a;
 }
 
-// polynomial GCD: O(M(n) log n);
-poly gcd(poly p, poly q, ll M)
-{
-	for (; !p.empty(); swap(p, q = divmod(q, p, M).second));
-	return p;
+template<typename T>
+vector<T> operator%(const vector<T>& a, const vector<T>& b) {
+	return a %= b;
 }
 
-// value of p(x)
-ll eval(poly p, ll x, ll M)
-{
-	ll ans = 0;
-	for (int i = p.size() - 1; i >= 0; --i)
-		ans = add(mul(ans, x, M), p[i], M);
-	return ans;
+template<typename T, typename U>
+vector<T> power(const vector<T>& a, const U& b, const vector<T>& c) {
+	assert(b >= 0);
+	vector<U> binary;
+	U bb = b;
+	while (bb > 0) {
+		binary.push_back(bb & 1);
+		bb >>= 1;
+	}
+	vector<T> res = vector<T>{1} % c;
+	for (int j = (int)binary.size() - 1; j >= 0; j--) {
+		res = res * res % c;
+		if (binary[j] == 1)
+			res = res * a % c;
+	}
+	return res;
 }
 
-//
-// faster multipoint evaluation
-// fast if |x| >= 10000.
-//
-// algo:
-//   evaluate(p, {x[0], ..., x[n-1]})
-//   = evaluate(p mod (X-x[0])...(X-x[n/2-1]), {x[0], ..., x[n/2-1]}),
-//   + evaluate(p mod (X-x[n/2])...(X-x[n-1]), {x[n/2], ..., x[n-1]}),
-//
-// f(n) = 2 f(n/2) + M(n) ==> O(M(n) log n)
-//
-vector<ll> evaluate(poly p, vector<ll> x, ll M)
-{
-	vector<poly> prod(8 * x.size()); // segment tree
-	function<poly(int, int, int)> run = [&](int i, int j, int k)
-	{
-		if (i == j) return prod[k] = (poly) {1};
-		if (i+1 == j) return prod[k] = (poly) {	M-x[i], 1};
-		return prod[k] = mul(run(i,(i+j)/2,2*k+1), run((i+j)/2,j,2*k+2), M);
+template<typename T>
+vector<T> derivative(vector<T> a) {
+	for (int i = 0; i < (int)a.size(); ++i)
+		a[i] *= i;
+	if (!a.empty())
+		a.erase(a.begin());
+	return a;
+}
+
+template<typename T>
+vector<T> primitive(vector<T> a) {
+	a.insert(a.begin(), 0);
+	for (int i = 1; i < (int)a.size(); ++i)
+		a[i] /= i;
+	return a;
+}
+
+template<typename T>
+vector<T> logarithm(const vector<T>& a) {
+	assert(!a.empty() && a[0] == 1);
+	vector<T> u = primitive(derivative(a) * inverse(a));
+	u.resize(a.size());
+	return u;
+}
+
+template<typename T>
+vector<T> exponent(const vector<T>& a) {
+	assert(!a.empty() && a[0] == 0);
+	int n = (int)a.size();
+	vector<T> b = {1};
+	while ((int)b.size() < n) {
+		vector<T> x(a.begin(), a.begin() + min(a.size(), b.size() << 1));
+		x[0] += 1;
+		vector<T> old_b = b;
+		b.resize(b.size() << 1);
+		x -= logarithm(b);
+		x *= old_b;
+		for (int i = (int)b.size() >> 1; i < (int)min(x.size(), b.size()); ++i)
+			b[i] = x[i];
+	}
+	b.resize(n);
+	return b;
+}
+
+template<typename T>
+vector<T> sqrt(const vector<T>& a) {
+	assert(!a.empty() && a[0] == 1);
+	int n = (int)a.size();
+	vector<T> b = {1};
+	while ((int)b.size() < n) {
+		vector<T> x(a.begin(), a.begin() + min(a.size(), b.size() << 1));
+		b.resize(b.size() << 1);
+		x *= inverse(b);
+		T inv2 = 1 / static_cast<T>(2);
+		for (int i = (int)b.size() >> 1; i < (int)min(x.size(), b.size()); ++i)
+			b[i] = x[i] * inv2;
+	}
+	b.resize(n);
+	return b;
+}
+
+template<typename T>
+vector<T> multiply(const vector<vector<T>>& a) {
+	if (a.empty())
+		return {0};
+	function<vector<T>(int, int)> mult = [&](int l, int r) {
+		if (l == r)
+			return a[l];
+
+		int y = (l + r) >> 1;
+		return mult(l, y) * mult(y + 1, r);
 	};
-	run(0, x.size(), 0);
-	vector<ll> y(x.size());
-	function<void(int, int, int, poly)> rec = 
-	[&](int i, int j, int k, poly p)
-	{
-		if (j - i <= 8)
-		{
-			for (; i < j; ++i) y[i] = eval(p, x[i], M);
-		}
-		else
-		{
-			rec(i, (i+j)/2, 2*k+1, divmod(p, prod[2*k+1], M).second);
-			rec((i+j)/2, j, 2*k+2, divmod(p, prod[2*k+2], M).second);
-		}
-	};
-	rec(0, x.size(), 0, p);
-	return y;
+	return mult(0, (int)a.size() - 1);
 }
 
-poly interpolate_n(vector<ll> x, vector<ll> y, ll M)
-{
-	int n = x.size();
-	vector<ll> dp(n + 1);
-	dp[0] = 1;
+template<typename T>
+T evaluate(const vector<T>& a, const T& x) {
+	T res = 0;
+	for (int i = (int)a.size() - 1; i >= 0; i--)
+		res = res * x + a[i];
+	return res;
+}
+
+template<typename T>
+vector<T> evaluate(const vector<T>& a, const vector<T>& x) {
+	if (x.empty())
+		return {};
+
+	if (a.empty())
+		return vector<T>(x.size(), 0);
+
+	int n = (int)x.size();
+	vector<vector<T>> st((n << 1) - 1);
+	function<void(int, int, int)> build = [&](int v, int l, int r) {
+		if (l == r) {
+			st[v] = vector<T>{-x[l], 1};
+		} else {
+			int y = (l + r) >> 1;
+			int z = v + ((y - l + 1) << 1);
+			build(v + 1, l, y);
+			build(z, y + 1, r);
+			st[v] = st[v + 1] * st[z];
+		}
+	};
+	build(0, 0, n - 1);
+	vector<T> res(n);
+	function<void(int, int, int, vector<T>)> eval = [&](int v, int l, int r, vector<T> f) {
+		f %= st[v];
+		if ((int)f.size() < 150) {
+			for (int i = l; i <= r; ++i)
+				res[i] = evaluate(f, x[i]);
+
+			return;
+		}
+		if (l == r) {
+			res[l] = f[0];
+		} else {
+			int y = (l + r) >> 1;
+			int z = v + ((y - l + 1) << 1);
+			eval(v + 1, l, y, f);
+			eval(z, y + 1, r, f);
+		}
+	};
+	eval(0, 0, n - 1, a);
+	return res;
+}
+
+// P(x[i]) = y[i]
+template<typename T>
+vector<T> interpolate(const vector<T>& x, const vector<T>& y) {
+	if (x.empty())
+		return {};
+
+	assert(x.size() == y.size());
+	int n = (int)x.size();
+	vector<vector<T>> st((n << 1) - 1);
+	function<void(int, int, int)> build = [&](int v, int l, int r) {
+		if (l == r) {
+			st[v] = vector<T>{-x[l], 1};
+		} else {
+			int w = (l + r) >> 1;
+			int z = v + ((w - l + 1) << 1);
+			build(v + 1, l, w);
+			build(z, w + 1, r);
+			st[v] = st[v + 1] * st[z];
+		}
+	};
+	build(0, 0, n - 1);
+	vector<T> m = st[0];
+	vector<T> dm = derivative(m);
+	vector<T> val(n);
+	function<void(int, int, int, vector<T>)> eval = [&](int v, int l, int r, vector<T> f) {
+		f %= st[v];
+		if ((int)f.size() < 150) {
+			for (int i = l; i <= r; ++i)
+				val[i] = evaluate(f, x[i]);
+
+			return;
+		}
+		if (l == r) {
+			val[l] = f[0];
+		} else {
+			int w = (l + r) >> 1;
+			int z = v + ((w - l + 1) << 1);
+			eval(v + 1, l, w, f);
+			eval(z, w + 1, r, f);
+		}
+	};
+	eval(0, 0, n - 1, dm);
 	for (int i = 0; i < n; ++i)
-	{
-		for (int j = i; j >= 0; --j)
-		{
-			dp[j + 1] = add(dp[j + 1], dp[j], M);
-			dp[j] = mul(dp[j], M - x[i], M);
-		}
-	}
-	poly r(n);
-	for (int i = 0; i < n; ++i)
-	{
-		ll den = 1, res = 0;
-		for (int j = 0; j < n; ++j)
-			if (i != j)
-				den = mul(den, sub(x[i], x[j], M), M);
-		den = div(1, den, M);
+		val[i] = y[i] / val[i];
 
-		for (int j = n - 1; j >= 0; --j)
-		{
-			res = add(dp[j + 1], mul(res, x[i], M), M);
-			r[j] = add(r[j], mul(res, mul(den, y[i], M), M), M);
-		}
-	}
-	while (!r.empty() && !r.back())
-		r.pop_back();
-	return r;
+	function<vector<T>(int, int, int)> calc = [&](int v, int l, int r) {
+		if (l == r)
+			return vector<T>{val[l]};
+
+		int w = (l + r) >> 1;
+		int z = v + ((w - l + 1) << 1);
+		return calc(v + 1, l, w) * st[z] + calc(z, w + 1, r) * st[v + 1];
+	};
+	return calc(0, 0, n - 1);
 }
 
-//
-// faster algo to find a poly p such that
-//   p(x[i]) = y[i]  for each i
-//
-// see http://people.mpi-inf.mpg.de/~csaha/lectures/lec6.pdf
-//
-poly interpolate(vector<ll> x, vector<ll> y, ll M)
+// P(x + a)
+template<typename T>
+vector<T> shift(vector<T> p, ll a, ll M)
 {
-	vector<poly> prod(8 * x.size()); // segment tree
-	function<poly(int, int, int)> run = [&](int i, int j, int k)
-	{
-		if (i == j) return prod[k] = (poly) {1};
-		if (i+1 == j) return prod[k] = (poly) {M-x[i], 1};
-		return prod[k] = mul(run(i,(i+j)/2,2*k+1), run((i+j)/2,j,2*k+2), M);
-	};
-	run(0, x.size(), 0); // preprocessing in O(n log n) time
-
-	poly H = prod[0]; // newton polynomial
-	for (int i = 1; i < H.size(); ++i)
-		H[i - 1] = mul(H[i], i, M);
-	do
-		H.pop_back();
-	while (!H.empty() && !H.back());
-
-	vector<ll> u(x.size());
-	function<void(int, int, int, poly)> rec = 
-	[&](int i, int j, int k, poly p)
-	{
-		if (j - i <= 8)
-		{
-			for (; i < j; ++i) u[i] = eval(p, x[i], M);
-		}
-		else
-		{
-			rec(i, (i+j)/2, 2*k+1, divmod(p, prod[2*k+1], M).second);
-			rec((i+j)/2, j, 2*k+2, divmod(p, prod[2*k+2], M).second);
-		}
-	};
-	rec(0, x.size(), 0, H); // multipoint evaluation
-
-	for (int i = 0; i < x.size(); ++i)
-		u[i] = div(y[i], u[i], M);
-
-	function<poly(int, int, int)> f = [&](int i, int j, int k)
-	{
-		if (i >= j) return poly();
-		if (i+1 == j) return (poly) {u[i]};
-		return add(mul(f(i,(i+j)/2,2*k+1), prod[2*k+2], M),
-		       mul(f((i+j)/2,j,2*k+2), prod[2*k+1], M), M);
-	};
-	return f(0, x.size(), 0);
-}
-
-//
-// return p(x+a)
-//
-poly shift_n(poly p, ll a, ll M)
-{
-	poly q(p.size());
-	for (int i = p.size() - 1; i >= 0; --i)
-	{
-		for (int j = p.size() - i - 1; j >= 1; --j)
-			q[j] = add(mul(q[j], a, M), q[j - 1], M);
-		q[0] = add(mul(q[0], a, M), p[i], M);
-	}
-	return q;
-}
-
-//
-// faster algorithm for computing p(x + a)
-//
-// fast if n >= 4096
-// algo: p(x+a) = p_h(x) (x+a)^m + q_h(x)
-// cplx: preproc: O(M(n))
-//       div-con: O(M(n) log n)
-//
-poly shift(poly p, ll a, ll M)
-{
-	vector<poly> pow(p.size());
+	vector<vector<T>> pow(p.size());
 	pow[0] = {1};
 	pow[1] = {a,1};
 	int m = 2;
 	for (; m < p.size(); m *= 2)
 		pow[m] = mul(pow[m / 2], pow[m / 2], M);
-	function<poly(poly, int)> rec = [&](poly p, int m)
+	function<vector<T>(vector<T>, int)> calc = [&](vector<T> p, int m)
 	{
 		if (p.size() <= 1) return p;
 		while (m >= p.size()) m /= 2;
-		poly q(p.begin() + m, p.end());
+		vector<T> q(p.begin() + m, p.end());
 		p.resize(m);
-		return add(mul(rec(q, m), pow[m], M), rec(p, m), M);
+		return calc(q, m) * pow[m] + calc(p, m);
 	};
-	return rec(p, m);
+	return calc(p, m);
 }
 
-//
-// overpeform when n >= 134217728 lol
-//
-ll factmod(ll n, ll M)
-{
-	if (n <= 1)
-		return 1;
-	ll m = sqrt(n);
-	function<poly(int, int)> get = [&](int i, int j)
-	{
-		if (i == j) return poly();
-		if (i+1 == j) return (poly) {i,1};
-		return mul(get(i, (i+j)/2), get((i+j)/2, j), M);
-	};
-	poly p = get(0, m); // = x (x+1) (x+2) ... (x+(m-1))
-	vector<ll> x(m);
-	for (int i = 0; i < m; ++i)
-		x[i] = 1 + i * m;
-	vector<ll> y = evaluate(p, x, M);
-	ll fac = 1;
-	for (int i = 0; i < m; ++i)
-		fac = mul(fac, y[i], M);
-	for (ll i = m * m + 1; i <= n; ++i)
-		fac = mul(fac, i, M);
-	return fac;
-}
-
-ll factmod_n(ll n, ll M)
-{
-	ll fac = 1;
-	for (ll k = 1; k <= n; ++k)
-		fac = mul(k, fac, M);
-	return fac;
-}
-
-ll factmod_p(ll n, ll M)
-{
-	// only works for prime M
-	ll fac = 1;
-	for (; n > 1; n /= M)
-	{
-		fac = mul(fac, (n / M) % 2 ? M - 1 : 1, M);
-		for (ll i = 2; i <= n % M; ++i)
-			fac = mul(fac, i, M);
+// f[i] = 1^i + 2^i + ... + up^i
+template<typename T>
+vector<T> faulhaber(const T& up, int n) {
+	vector<T> ex(n + 1);
+	T e = 1;
+	for (int i = 0; i <= n; ++i) {
+		ex[i] = e;
+		e /= i + 1;
 	}
-	return fac;
+	vector<T> den = ex;
+	den.erase(den.begin());
+	for (auto& d : den)
+		d = -d;
+
+	vector<T> num(n);
+	T p = 1;
+	for (int i = 0; i < n; ++i) {
+		p *= up + 1;
+		num[i] = ex[i + 1] * (1 - p);
+	}
+	vector<T> res = num * inverse(den);
+	res.resize(n);
+	T f = 1;
+	for (int i = 0; i < n; ++i) {
+		res[i] *= f;
+		f *= i + 1;
+	}
+	return res;
 }
+
+// (x + 1) * (x + 2) * ... * (x + n)
+// (can be optimized with precomputed inverses)
+template<typename T>
+vector<T> sequence(int n) {
+	if (n == 0)
+		return {1};
+
+	if (n % 2 == 1)
+		return sequence<T>(n - 1) * vector<T>{n, 1};
+
+	vector<T> c = sequence<T>(n / 2);
+	vector<T> a = c;
+	reverse(a.begin(), a.end());
+	T f = 1;
+	for (int i = n / 2 - 1; i >= 0; i--) {
+		f *= n / 2 - i;
+		a[i] *= f;
+	}
+	vector<T> b(n / 2 + 1);
+	b[0] = 1;
+	for (int i = 1; i <= n / 2; ++i)
+		b[i] = b[i - 1] * (n / 2) / i;
+
+	vector<T> h = a * b;
+	h.resize(n / 2 + 1);
+	reverse(h.begin(), h.end());
+	f = 1;
+	for (int i = 1; i <= n / 2; ++i) {
+		f /= i;
+		h[i] *= f;
+	}
+	vector<T> res = c * h;
+	return res;
+}
+
+template<class T>
+T factorial(long long n) {
+	if (n == 0)
+		return 1;
+	int m = min((long long) (sqrt(n) * 2), n);
+	vector<T> a = sequence<T>(m);
+	vector<T> x(n / m);
+	for (size_t i = 0; i < x.size(); ++i) {
+		x[i] = i;
+		x[i] *= m;
+	}
+	vector<T> b = evaluate(a, x);
+	T res = 1;
+	for (auto v : b) res *= v;
+	for (long long i = n / m * m + 1; i <= n; ++i) {
+		res *= i;
+	}
+	return res;
+}
+
+/*
+	C(x) = A(x) * B(x)
+	add append a new coeficient to B
+*/
+template<typename T>
+class OnlineProduct {
+ public:
+	const vector<T> a;
+	vector<T> b;
+	vector<T> c;
+
+	OnlineProduct(const vector<T>& a_) : a(a_) {}
+
+	T add(const T& val) {
+		int i = (int)b.size();
+		b.push_back(val);
+		if ((int)c.size() <= i)
+			c.resize(i + 1);
+
+		c[i] += a[0] * b[i];
+		int z = 1;
+		while ((i & (z - 1)) == z - 1 && (int)a.size() > z) {
+			vector<T> a_mul(a.begin() + z, a.begin() + min(z << 1, (int)a.size()));
+			vector<T> b_mul(b.end() - z, b.end());
+			vector<T> c_mul = a_mul * b_mul;
+			if ((int)c.size() <= i + (int)c_mul.size())
+				c.resize(i + c_mul.size() + 1);
+
+			for (int j = 0; j < (int)c_mul.size(); ++j)
+				c[i + 1 + j] += c_mul[j];
+
+			z <<= 1;
+		}
+		return c[i];
+	}
+};
