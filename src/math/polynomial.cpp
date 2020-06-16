@@ -117,7 +117,7 @@ vector<T>& operator%=(vector<T>& a, const vector<T>& b) {
 }
 
 template<typename T>
-vector<T> operator%(const vector<T>& a, const vector<T>& b) {
+vector<T> operator%(vector<T> a, const vector<T>& b) {
 	return a %= b;
 }
 
