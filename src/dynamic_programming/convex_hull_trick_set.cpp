@@ -4,7 +4,7 @@
 // and O(log n) for query
 // WARNING: with doubles may produce runtime error
 // due to procesision errors, besides be carefull in
-// case of overflow when calculation corss/dot 
+// case of overflow when calculation cross/dot 
 // products
 
 template<typename T>

@@ -79,21 +79,21 @@ ll inv(ll b, ll M)
 		swap(x -= u * q, u);
 		swap(t -= s * q, s);
 	}
-	return (x %= M) >= 0 ? x : x + M;
+	return (x %= M) >= 0 ? x : (x + M);
 }
 
-// solve b x == a (mod M)
+// solve a x == b (mod M) (sol iff (a, m) | b same as (a, m) | (b, m))
 ll div(ll a, ll b, ll M)
 {
-	ll u = 1, x = 0, s = b, t = M;
+	ll u = 1, x = 0, s = a, t = M;
 	while (s)
 	{
 		ll q = t / s;
 		swap(x -= u * q, u);
 		swap(t -= s * q, s);
 	}
-	if (a % t) return -1; // infeasible
-	return (x < 0 ? x + M : x) * (a / t) % M;
+	if (b % t) return -1; // infeasible
+	return (x < 0 ? (x + M) : x) * (b / t) % M;
 }
 
 // Modular Matrix

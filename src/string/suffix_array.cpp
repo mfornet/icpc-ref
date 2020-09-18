@@ -4,7 +4,7 @@
 	Notes: The suffix starting in |S| is always the lowest and have lcp 0 with the next suffix.
 			lcp[i] is the longest common prefix between the suffix in sa[i] and sa[i-1]
 	
-	Complexity: O(|S|)
+	Complexity: O(|S| log |S|)
 */
 
 struct suffix_array

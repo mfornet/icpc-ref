@@ -4,9 +4,10 @@
 	Complexity: O(n^2 * m) faster in most cases
 	    O(min(n^(2/3), m^(1/2)) * m) in networks with unit capacities
 	    O(n^(1/2) * m) in bipartite networks
+	** be careful if lb(flow with lower bound) with flow_type **
 */
 
-template<typename C, typename R = C>
+template<typename C, typename R = C, bool lb = false>
 struct dinic
 {
 	typedef C flow_type;
@@ -24,17 +25,17 @@ struct dinic
 		int rev;
 		flow_type cap, flow;
 
-		edge(int src, int dst, int rev, flow_type cap) :
-			src(src), dst(dst), rev(rev), cap(cap), flow(0) {}
+		edge(int src, int dst, int rev, flow_type cap, flow_type flow) :
+			src(src), dst(dst), rev(rev), cap(cap), flow(flow) {}
 	};
 
-	dinic(int n) : adj(n), que(n), level(n), edge_pos(n) {}
+	dinic(int n) : adj(n + 2*lb), que(n + 2*lb), level(n + 2*lb), edge_pos(n + 2*lb) {}
 
-	int add_edge(int src, int dst, flow_type cap, flow_type rcap = 0)
+	int add_edge(int src, int dst, flow_type cap, flow_type rcap = 0) // if lb rcap is low
 	{
-		adj[src].emplace_back(src, dst, (int) adj[dst].size(), cap);
+		adj[src].emplace_back(src, dst, (int) adj[dst].size(), cap, lb ? rcap : 0);
 		if (src == dst) adj[src].back().rev++;
-		adj[dst].emplace_back(dst, src,  (int) adj[src].size() - 1, rcap);
+		adj[dst].emplace_back(dst, src,  (int) adj[src].size() - 1, lb ? 0 : rcap, 0);
 		return (int) adj[src].size() - 1 - (src == dst);
 	}
 
@@ -83,8 +84,42 @@ struct dinic
 		return flow;
 	}
 
-private:
+	result_type max_flow_lb(int source, int sink)
+	{
+		int n = adj.size() - 2;
+		vector<flow_type> delta(n + 2);
+		for (int u = 0; u < n; ++u)
+			for (auto &e : adj[u])
+			{
+				delta[u] -= e.flow;
+				delta[e.dst] += e.flow;
+			}
+
+		result_type sum = 0;
+		int s = n, t = n + 1;
+		for (int u = 0; u < n; ++u)
+		{
+			if (delta[u] > 0)
+			{
+				add_edge(s, u, delta[u], 0);
+				sum += delta[u];
+			}
+			else if (delta[u] < 0)
+				add_edge(u, t, -delta[u], 0);
+		}
+
+		add_edge(sink, source, oo, 0);
+		if (max_flow(s, t) != sum)
+			return -1; // no solution
+
+		result_type flow = adj[sink].back().flow;
+		adj[sink].pop_back();
+		adj[source].pop_back();
+		return flow + max_flow(source, sink);
+	}
+
 	std::vector<std::vector<edge>> adj;
+private:
 	std::vector<int> que;
 	std::vector<int> level;
 	std::vector<int> edge_pos;
