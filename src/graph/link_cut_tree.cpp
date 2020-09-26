@@ -51,7 +51,6 @@ struct link_cut_tree
 
 	void cut(node* u, node* v) // if u, v adj in tree
 	{
-		//make_root(u); access(v); cut(v);
 		cut(depth(u) > depth(v) ? u : v);
 	}
 
@@ -95,8 +94,6 @@ struct splay_tree
 
 	virtual void update()
 	{
-		if (ch[0]) ch[0]->push();
-		if (ch[1]) ch[1]->push();
 		sz = 1 + get_sz(ch[0]) + get_sz(ch[1]);
 	}
 
@@ -149,9 +146,10 @@ struct splay_tree
 	}
 };
 
+// lazy should be I'm ok my childs are not ok (only affect childs)
+// calling u->update require no lazy in u
 struct node : splay_tree<node*>
 {
-	using splay_tree::ch;
 	ll x, sub, vsub;
 
 	node() : splay_tree() { sub = vsub = 0; }
@@ -169,8 +167,54 @@ struct node : splay_tree<node*>
 		vsub += (add ? +1 : -1) * v->sub;
 	}
 
-	void push() override // make sure push fix the node (don't call splay_tree::update)
+	void push() override
 	{
 		splay_tree::push();
+	}
+};
+
+struct node_sub_sum : splay_tree<node_sub_sum*>
+{
+	int rsz, vrsz; ll x, sub, vsub, addsub, addvsub;
+
+	node_sub_sum() : splay_tree() { x = vrsz = sub = vsub = addsub = addvsub = 0; rsz = 1; }
+
+	void update() override
+	{
+		splay_tree::update();
+		assert(addsub == 0);
+		sub = x + vsub;
+		rsz = 1 + vrsz;
+		for (int i = 0; i < 2; ++i)
+			if (ch[i])
+				sub += ch[i]->sub, rsz += ch[i]->rsz;
+	}
+
+	void update_vsub(node_sub_sum* v, bool add)
+	{
+		if (!add) v->apply(addvsub);
+		vsub += (add ? +1 : -1) * v->sub;
+		vrsz += (add ? +1 : -1) * v->rsz;
+		if (add) v->apply(-addvsub);
+	}
+
+	void push() override
+	{
+		splay_tree::push();
+		if (addsub)
+		{
+			if (ch[0]) ch[0]->apply(addsub);
+			if (ch[1]) ch[1]->apply(addsub);
+			addsub = 0;
+		}
+	}
+
+	void apply(ll i)
+	{
+		x += i;
+		sub += (ll)i * rsz;
+		vsub += (ll)i * vrsz;
+		addsub += i;
+		addvsub += i;
 	}
 };
