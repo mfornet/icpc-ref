@@ -24,6 +24,8 @@ struct node2 : splay_tree<node2*>
 	void update() override
 	{
 		splay_tree::update();
+		if (ch[0]) ch[0]->push();
+		if (ch[1]) ch[1]->push();
 		c = a, d = b;
 		if (ch[0]) tie(c, d) = make_pair(c * ch[0]->c % mod, (c * ch[0]->d + d) % mod);
 		if (ch[1]) tie(c, d) = make_pair(ch[1]->c * c % mod, (ch[1]->c * d + ch[1]->d) % mod);
