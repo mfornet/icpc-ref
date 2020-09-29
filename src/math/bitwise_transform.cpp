@@ -10,10 +10,10 @@ enum bit_op { AND, OR, XOR };
 namespace bitwise_transform
 {
 	template<int P, typename T>
-	inline void fix(T &x)
+	inline void add(T &x, T y)
 	{
-		if (x >= P) x -= P;
-		else if (x < 0) x += P;
+		x += y;
+		if (P != 0 && x >= P) x -= P;
 	}
 
 	template<bit_op B, int P, bool inv = false, typename T>
@@ -24,23 +24,22 @@ namespace bitwise_transform
 				for (int j = i; j < i + len; ++j)
 				{
 					T u = a[j], v = a[j + len];
-					if (B == AND) a[j] = v - u * inv, a[j + len] = u + v * (!inv);
-					if (B == OR) a[j] = u * (!inv) + v, a[j + len] = u - inv * v;
-					if (B == XOR) a[j] = u + v, a[j + len] = u - v;
-					if (P != -1) fix<P>(a[j]), fix<P>(a[j + len]);
+					if (B == AND) add<P>(a[j], inv ? P-v : v);
+					if (B == OR) add<P>(a[j + len], inv ? P-u : u);
+					if (B == XOR) add<P>(a[j], v), add<P>(a[j + len] = u, P-v);
 				}
 		if (B == XOR && inv)
 		{
 			int in = pow_mod(n, P-2, P);
 			for (int i = 0; i < n; ++i)
 			{
-				if (P == -1) a[i] /= n;
+				if (P == 0) a[i] /= n;
 				else a[i] = (ll)a[i] * in % P;
 			}
 		}
 	}
 
-	template<bit_op B, int P = -1, typename T>
+	template<bit_op B, int P = 0, typename T>
 	vector<T> convolve(vector<T> a, vector<T> b)
 	{
 		int n = max(a.size(), b.size()), sz = 1;
@@ -51,7 +50,7 @@ namespace bitwise_transform
 		transform<B, P>(b.data(), sz);
 		for (int i = 0; i < sz; ++i)
 		{
-			if (P == -1) a[i] *= b[i];
+			if (P == 0) a[i] *= b[i];
 			else a[i] = (ll)a[i] * b[i] % P;
 		}
 		transform<B, P, true>(a.data(), sz);
