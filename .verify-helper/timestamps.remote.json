@@ -14,6 +14,7 @@
 "tests/data_structures/wavelet_matrix2.test.cpp": "2020-05-07 06:16:01 -0400",
 "tests/dynamic_programming/lis.test.cpp": "2020-04-01 03:21:41 -0400",
 "tests/geometry/rectangle_union.test.cpp": "2020-02-28 18:58:24 -0500",
+"tests/graph/bipartite_matching.test.cpp": "2020-10-02 20:52:57 -0400",
 "tests/graph/dinic.test.cpp": "2020-09-18 16:06:38 -0400",
 "tests/graph/hld.test.cpp": "2020-05-25 13:47:54 -0400",
 "tests/graph/hld2.test.cpp": "2020-05-25 13:47:54 -0400",
