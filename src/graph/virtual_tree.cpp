@@ -56,11 +56,10 @@ struct virtual_tree
 		return depth[pos[u]] + depth[pos[v]] - 2*depth[pos[lca(u, v)]];
 	}
 
-	vector<vector<pair<int, int>>> compress(vector<int> &a)
+	vector<vector<pair<int, int>>> compress(vector<int> c)
 	{
 		auto cmp = [&](const int &x, const int &y) { return pos[x] < pos[y]; };
 
-		auto c = a;
 		sort(c.begin(), c.end(), cmp);
 		for (int i = 1, sz = c.size(); i < sz; ++i)
 			c.push_back(lca(c[i-1], c[i]));
