@@ -3,10 +3,7 @@
 	Complexity: O(n log n)
 */
 
-typedef long long ll;
-typedef complex<ll> point;
-
-ll rectilinear_mst(vector<point> ps)
+pair<ll, vector<pair<int, int>>> rectilinear_mst(vector<point> ps)
 {
 	vector<int> id(ps.size());
 	iota(id.begin(), id.end(), 0);
@@ -58,10 +55,14 @@ ll rectilinear_mst(vector<point> ps)
 		return a.weight < b.weight;
 	});
 
+	vector<pair<int, int>> tree;
 	union_find uf(ps.size());
 	for (edge e : edges)
 		if (uf.join(e.src, e.dst))
+		{
 			cost += e.weight;
+			tree.push_back({ e.src, e.dst });
+		}
 
-	return cost;
+	return { cost, tree };
 }
