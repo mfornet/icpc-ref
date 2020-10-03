@@ -35,7 +35,7 @@ vector<vector<int>> strongly_connected_components(const vector<vector<int>> &g)
 	return scc;
 }
 
-vector<vector<int>> strongly_connected_components(const vector<vector<int>> &g)
+vector<vector<int>> strongly_connected_components_it(const vector<vector<int>> &g)
 {
 	int n = g.size();
 	vector<vector<int>> scc;

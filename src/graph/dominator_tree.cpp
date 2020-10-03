@@ -8,7 +8,7 @@
 	if every path from the entry node to n must go through d
 */
 
-vector<int> dominators(const vector<vector<int>> &g, int r)
+vector<int> dominators(const vector<vector<int>> &g, int root)
 {
 	int n = g.size();
 	vector<int> ord, rank(n, n), prev(n, n), anc(n, n), idom(n, n), semi(n), low(n);
@@ -25,7 +25,7 @@ vector<int> dominators(const vector<vector<int>> &g, int r)
 			dfs(v);
 		}
 	};
-	dfs(r);
+	dfs(root);
 	for (int i = 0; i < n; ++i) semi[i] = low[i] = i;
 	function<int(int)> eval = [&](int v)
 	{

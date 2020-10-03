@@ -79,60 +79,51 @@ struct skew_heap
 	}
 };
 
-template<typename T>
-struct minimum_aborescense
+template<typename T, typename R = T>
+pair<R, vector<int>> minimum_aborescense(const vector<edge<T>> &edges, int n, int root)
 {
-	vector<edge<T>> edges;
+	union_find uf(n);
+	vector<skew_heap<T>> heap(n);
+	for (auto e : edges)
+		heap[e.dst].push(e);
 
-	void add_edge(int src, int dst, T weight)
+	R score = 0;
+	vector<int> seen(n, -1), parent(n, -1);
+	seen[root] = root;
+	for (int s = 0; s < n; ++s)
 	{
-		edges.push_back({ src, dst, weight });
-	}
-
-	T solve(int n, int r)
-	{
-		union_find uf(n);
-		vector<skew_heap<T>> heap(n);
-		for (auto e : edges)
-			heap[e.dst].push(e);
-
-		T score = 0;
-		vector<int> seen(n, -1);
-		seen[r] = r;
-		for (int s = 0; s < n; ++s)
+		vector<int> path;
+		for (int u = s; seen[u] < 0;)
 		{
-			vector<int> path;
-			for (int u = s; seen[u] < 0;)
+			path.push_back(u);
+			seen[u] = s;
+			if (heap[u].empty())
+				return { numeric_limits<R>::max(), {} };
+
+			edge<T> min_e = heap[u].top();
+			score += min_e.weight;
+			parent[min_e.dst] = min_e.src;
+			heap[u].add(-min_e.weight);
+			heap[u].pop();
+
+			int v = uf.root(min_e.src);
+			if (seen[v] == s)
 			{
-				path.push_back(u);
-				seen[u] = s;
-				if (heap[u].empty())
-					return numeric_limits<T>::max();
-
-				edge<T> min_e = heap[u].top();
-				score += min_e.weight;
-				heap[u].add(-min_e.weight);
-				heap[u].pop();
-
-				int v = uf.root(min_e.src);
-				if (seen[v] == s)
+				skew_heap<T> new_heap;
+				while (true)
 				{
-					skew_heap<T> new_heap;
-					while (true)
-					{
-						int w = path.back();
-						path.pop_back();
-						new_heap.merge(heap[w]);
-						if (!uf.join(v, w))
-							break;
-					}
-					heap[uf.root(v)] = new_heap;
-					seen[uf.root(v)] = -1;
+					int w = path.back();
+					path.pop_back();
+					new_heap.merge(heap[w]);
+					if (!uf.join(v, w))
+						break;
 				}
-				u = uf.root(v);
+				heap[uf.root(v)] = new_heap;
+				seen[uf.root(v)] = -1;
 			}
+			u = uf.root(v);
 		}
-
-		return score;
 	}
-};
+
+	return { score, parent };
+}
