@@ -15,6 +15,7 @@
 "tests/dynamic_programming/lis.test.cpp": "2020-04-01 03:21:41 -0400",
 "tests/geometry/rectangle_union.test.cpp": "2020-02-28 18:58:24 -0500",
 "tests/geometry/rectilinear_mst.test.cpp": "2020-10-03 01:18:11 -0400",
+"tests/graph/arborescence.test.cpp": "2020-10-06 23:02:28 -0400",
 "tests/graph/bipartite_matching.test.cpp": "2020-10-06 22:54:02 -0400",
 "tests/graph/dinic.test.cpp": "2020-09-18 16:06:38 -0400",
 "tests/graph/dominator_tree.test.cpp": "2020-10-03 01:18:11 -0400",
