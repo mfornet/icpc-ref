@@ -16,7 +16,7 @@ typedef complex<ld> point;
 #define S second
 
 #include "../../src/data_structures/union_find.cpp"
-#include "../../src/graph/aborescense2.cpp"
+#include "../../src/graph/arborescence.cpp"
 
 int main()
 {
