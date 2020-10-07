@@ -130,7 +130,7 @@ struct splay_tree
 		set_link(g->p, static_cast<pnode>(this), g->dir());
 		set_link(g, ch[x^1], x);
 		set_link(static_cast<pnode>(this), g, x^1);
-		g->update(); update();
+		g->update(); //update();
 	}
 
 	void splay() // bring this to top of splay tree
@@ -142,7 +142,7 @@ struct splay_tree
 			rotate();
 		}
 		if (!is_root()) p->push(), push(), rotate();
-		push();
+		push(); update();
 	}
 };
 

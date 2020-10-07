@@ -57,7 +57,7 @@ struct hopcroft_karp
 		return match;
 	}
 
-	pair<vector<int>, vector<int>> minimum_vertex_cover()
+	pair<vector<int>, vector<int>> min_vertex_cover()
 	{
 		max_matching();
 		vector<int> L, R, inR(m);

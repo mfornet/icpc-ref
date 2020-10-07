@@ -29,19 +29,20 @@ int main()
 
 	int n, m, root;
 	cin >> n >> m >> root;
-	
-	vector<edge<int>> e;
+
+	vector<edge<ll>> e;
 	for (int i = 0, u, v, w; i < m; ++i)
 	{
 		cin >> u >> v >> w;
 		e.push_back({ u, v, w });
 	}
 
-	auto ans = minimum_aborescense<int, ll>(e, n, root);
-	ans.S[root] = root;
+	auto ans = min_arborescence(e, n, root);
+	assert(ans.S[root] == -1);
+	vector<vector<int>> adj(n);
 	cout << ans.F << "\n";
 	for (auto &i : ans.S)
-		cout << i << " \n"[&i==&ans.S.back()];
+		cout << (i == -1 ? root : e[i].src) << " \n"[&i==&ans.S.back()];
 
 	return 0;
 }
