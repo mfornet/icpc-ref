@@ -14,7 +14,6 @@ typedef complex<ll> point;
 
 struct node2 : splay_tree<node2*>
 {
-	using splay_tree::ch;
 	ll x, sub, vsub;
 	int prio, sprio;
 

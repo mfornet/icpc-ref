@@ -57,7 +57,7 @@ struct link_cut_tree
 	void make_root(node* u) // make u root of LCT component
 	{
 		access(u);
-		u->rev ^= 1;
+		u->reverse();
 		access(u);
 		assert(!u->ch[0] && !u->ch[1]);
 	}
@@ -101,10 +101,16 @@ struct splay_tree
 	{
 		if (rev)
 		{
-			if (ch[0]) ch[0]->rev ^= 1;
-			if (ch[1]) ch[1]->rev ^= 1;
-			swap(ch[0], ch[1]); rev = 0;
+			if (ch[0]) ch[0]->reverse();
+			if (ch[1]) ch[1]->reverse();
+			rev = 0;
 		}
+	}
+
+	virtual void reverse()
+	{
+		rev ^= 1;
+		swap(ch[0], ch[1]);
 	}
 
 	int dir()
@@ -148,6 +154,7 @@ struct splay_tree
 
 // lazy should be I'm ok my childs are not ok (only affect childs)
 // calling u->update require no lazy in u
+// use reverse when the order of the childs matters (fix the node here)
 struct node : splay_tree<node*>
 {
 	ll x, sub, vsub;
@@ -170,6 +177,11 @@ struct node : splay_tree<node*>
 	void push() override
 	{
 		splay_tree::push();
+	}
+
+	void reverse() override
+	{
+		splay_tree::reverse();
 	}
 };
 
@@ -207,6 +219,11 @@ struct node_sub_sum : splay_tree<node_sub_sum*>
 			if (ch[1]) ch[1]->apply(addsub);
 			addsub = 0;
 		}
+	}
+
+	void reverse() override
+	{
+		splay_tree::reverse();
 	}
 
 	void apply(ll i)

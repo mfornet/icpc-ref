@@ -14,7 +14,6 @@ typedef complex<ll> point;
 
 struct node2 : splay_tree<node2*>
 {
-	using splay_tree::ch;
 	ll val, sval;
 
 	node2() : splay_tree() {  }
@@ -28,11 +27,6 @@ struct node2 : splay_tree<node2*>
 	}
 
 	void update_vsub(node2* v, bool add) {}
-
-	void push() override
-	{
-		splay_tree::push();
-	}
 };
 
 int main()

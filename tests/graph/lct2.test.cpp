@@ -16,30 +16,28 @@ const ll mod = 998244353;
 
 struct node2 : splay_tree<node2*>
 {
-	using splay_tree::ch;
-	ll a, b, c, d;
+	ll a, b, c, d, rc, rd;
 
 	node2() : splay_tree() {  }
 
 	void update() override
 	{
 		splay_tree::update();
-		if (ch[0]) ch[0]->push();
-		if (ch[1]) ch[1]->push();
 		c = a, d = b;
 		if (ch[0]) tie(c, d) = make_pair(c * ch[0]->c % mod, (c * ch[0]->d + d) % mod);
 		if (ch[1]) tie(c, d) = make_pair(ch[1]->c * c % mod, (ch[1]->c * d + ch[1]->d) % mod);
+		rc = a, rd = b;
+		if (ch[1]) tie(rc, rd) = make_pair(rc * ch[1]->rc % mod, (rc * ch[1]->rd + rd) % mod);
+		if (ch[0]) tie(rc, rd) = make_pair(ch[0]->rc * rc % mod, (ch[0]->rc * rd + ch[0]->rd) % mod);
 	}
 
 	void update_vsub(node2* v, bool add) {}
 
-	void push() override
+	void reverse() override
 	{
-		if (splay_tree::rev)
-		{
-			splay_tree::push();
-			update();
-		}
+		splay_tree::reverse();
+		swap(c, rc);
+		swap(d, rd);
 	}
 };
 
