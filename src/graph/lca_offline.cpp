@@ -20,7 +20,7 @@ vector<int> lca_offline(vector<vector<int>> &adj, vector<pair<int, int>> &querie
 			}
 		for (auto i : q[u])
 		{
-			int v = (queries[i].F == u) ? queries[i].S : queries[i].F;
+			int v = u ^ queries[i].F ^ queries[i].S;
 			if (ancestor[v] != -1)
 				ans[i] = ancestor[uf.root(v)];
 		}
