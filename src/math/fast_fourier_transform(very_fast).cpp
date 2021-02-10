@@ -82,8 +82,6 @@ namespace fft
 				}
 	}
 
-	using ll = long long;
-
 	// Compute ffts of two real arrays doing 1 fft instead of 2 ffts
 	// n must be a power of 2
 	template<typename T>
@@ -103,8 +101,6 @@ namespace fft
 		}
 		return make_pair(move(pa), move(pb));
 	}
-
-	typedef long long ll;
 
 	// this only works if intermediate values are less than 10^15
 	vector<ll> convolve(const vector<int> &a, const vector<int> &b)

@@ -57,8 +57,6 @@ namespace fft
 		return make_pair(move(pa), move(pb));
 	}
 
-	typedef long long ll;
-
 	// this only works if intermediate values are less than 10^15
 	vector<ll> convolve(const vector<int> &a, const vector<int> &b)
 	{

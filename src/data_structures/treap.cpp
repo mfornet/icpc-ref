@@ -81,7 +81,7 @@ struct treap
 		return l;
 	}
 
-	/*int pos(node *u) // require parents
+	/*int pos(node *u) // require parents (set parent to NULL in update and fix child->p)
 	{
 		int r = size(u->l);
 		while (u->p != NULL)

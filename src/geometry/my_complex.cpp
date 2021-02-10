@@ -29,3 +29,28 @@ namespace my_complex
 	static point operator /(point a, point b) { return point(a.x*b.x + a.y*b.y, a.y*b.x - a.x*b.y) / (b.x*b.x + b.y*b.y); }
 	static point operator /=(point &a, point b) { return a = point(a.x*b.x + a.y*b.y, a.y*b.x - a.x*b.y) / (b.x*b.x + b.y*b.y); }
 }
+
+struct frac
+{
+	ll x, y;
+	frac(ll _x = 0, ll _y = 1) : x(_x), y(_y)
+	{
+		ll g = __gcd(abs(x), abs(y));
+		x /= g, y /= g;
+		if (y < 0) x = -x, y = -y;
+	}
+};
+
+frac operator-(const frac &a) { return { -a.x, a.y }; }
+frac operator+(const frac &a, const frac &b) { return { a.x * b.y + a.y * b.x, a.y * b.y }; }
+frac operator-(const frac &a, const frac &b) { return { a.x * b.y - a.y * b.x, a.y * b.y }; }
+frac operator*(const frac &a, const frac &b) { return { a.x * b.x, a.y * b.y }; }
+frac operator/(const frac &a, const frac &b) { return { a.x * b.y, a.y * b.x }; }
+frac operator+=(frac &a, const frac &b) { return a = a + b; }
+frac operator-=(frac &a, const frac &b) { return a = a - b; }
+frac operator*=(frac &a, const frac &b) { return a = a * b; }
+frac operator/=(frac &a, const frac &b) { return a = a / b; }
+bool operator==(const frac &a, const frac &b) { return a.x == b.x && a.y == b.y; }
+bool operator!=(const frac &a, const frac &b) { return !(a == b); }
+bool operator<(const frac &a, const frac &b) { return a.x * b.y < b.x * a.y; }
+bool operator>=(const frac &a, const frac &b) { return !(a < b); }
