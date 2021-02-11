@@ -12,45 +12,30 @@ struct suffix_array
 	int n;
 	vector<int> sa, lcp, rank;
 
-	suffix_array(const string &s) : n(s.length() + 1), sa(n), lcp(n), rank(n)
+	template<typename RAIter>
+	suffix_array(const RAIter &bg, const RAIter &nd, int alp = 256)
+		: n(nd - bg + 1), sa(n), lcp(n), rank(n)
 	{
-		vector<int> top(max(256, n));
-		for (int i = 0; i < n; ++i)
-			top[rank[i] = s[i] & 0xff]++;
-
-		partial_sum(top.begin(), top.end(), top.begin());
-		for (int i = 0; i < n; ++i)
-			sa[--top[rank[i]]] = i;
-
-		vector<int> tmp(n);
-		for (int len = 1, j; len < n; len <<= 1)
+		vector<int> ws(max(n, alp));
+		auto &x = lcp, &y = rank;
+		copy(bg, nd, x.begin());
+		iota(sa.begin(), sa.end(), 0);
+		for (int j = 0, p = 0; p < n; j = max(1, j * 2), alp = p)
 		{
-			for (int i = 0; i < n; ++i)
-			{
-				j = sa[i] - len;
-				if (j < 0) j += n;
-				tmp[top[rank[j]]++] = j;
-			}
-
-			sa[tmp[top[0] = 0]] = j = 0;
-			for (int i = 1, j = 0; i < n; ++i)
-			{
-				if (rank[tmp[i]] != rank[tmp[i - 1]]
-						|| rank[tmp[i] + len] != rank[tmp[i - 1] + len])
-					top[++j] = i;
-				sa[tmp[i]] = j;
-			}
-
-			copy(sa.begin(), sa.end(), rank.begin());
-			copy(tmp.begin(), tmp.end(), sa.begin());
-			if (j >= n - 1) break;
+			p = j, iota(y.begin(), y.end(), n - j);
+			fill(ws.begin(), ws.end(), 0);
+			for (int i = 0; i < n; ws[x[i++]]++)
+				if (sa[i] >= j) y[p++] = sa[i] - j;
+			partial_sum(ws.begin(), ws.end(), ws.begin());
+			for (int i = n; i--;) sa[--ws[x[y[i]]]] = y[i];
+			x.swap(y), p = 1, x[sa[0]] = 0;
+			for (int i = 1, a, b; i < n; ++i)
+				a = sa[i - 1], b = sa[i], x[b] =
+				(y[a] == y[b] && y[a + j] == y[b + j]) ? p - 1 : p++;
 		}
-
-		int i, j, k;
-		for (j = rank[lcp[i = k = 0] = 0]; i < n - 1; ++i, ++k)
-		{
-			while (k >= 0 && s[i] != s[sa[j - 1] + k])
-				lcp[j] = k--, j = rank[sa[j] + 1];
-		}
+		for (int i = 0; i < n; ++i) rank[sa[i]] = i;
+		for (int i = 0, j, k = lcp[0] = 0; i < n - 1; lcp[rank[i++]] = k)
+			for (k && k--, j = sa[rank[i] - 1];
+					bg[i + k] == bg[j + k]; k++);
 	}
 };

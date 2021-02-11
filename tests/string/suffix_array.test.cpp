@@ -18,7 +18,7 @@ int main()
 
 	string s;
 	cin >> s;
-	suffix_array sa(s);
+	suffix_array sa(s.begin(), s.end());
 	int n = sa.sa.size();
 	for (int i = 1; i < n; ++i)
 		cout << sa.sa[i] << " \n"[i+1==n];
