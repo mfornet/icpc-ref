@@ -13,15 +13,6 @@ typedef long long ll;
 typedef vector<ll> vec;
 typedef vector<vec> mat;
 
-// inverse of 1, 2, ..., n mod P in O(n) (P must be prime)
-vector<ll> inverses(int n, int P)
-{
-	vector<ll> inv(n+1, 1);
-	for (int i = 2; i <= n; ++i)
-		inv[i] = inv[P%i] * (P-P/i) % P;
-	return inv;
-}
-
 template<typename T, typename U>
 T pow_mod(T a, U b, int mod)
 {
@@ -34,7 +25,16 @@ T pow_mod(T a, U b, int mod)
 	return r;
 }
 
-namespace combinatorics
+// inverse of 1, 2, ..., n mod P in O(n) (P must be prime)
+vector<ll> inverses(int n, int P)
+{
+	vector<ll> inv(n+1, 1);
+	for (int i = 2; i <= n; ++i)
+		inv[i] = inv[P%i] * (P-P/i) % P;
+	return inv;
+}
+
+namespace combi
 {
 	const int mod = 998244353, N = 2e5+5; // mod must be prime
 	int fac[N], ifac[N];
@@ -42,10 +42,11 @@ namespace combinatorics
 	void init()
 	{
 		fac[0] = ifac[0] = 1;
+		auto inv = inverses(N, mod);
 		for (int i = 1; i < N; ++i)
 		{
 			fac[i] = (ll)fac[i-1] * i % mod;
-			ifac[i] = pow_mod(fac[i], mod-2, mod);
+			ifac[i] = (ll)ifac[i-1] * inv[i] % mod;
 		}
 	}
 
@@ -83,6 +84,7 @@ ll inv(ll b, ll M)
 }
 
 // solve a x == b (mod M) (sol iff (a, m) | b same as (a, m) | (b, m))
+// return min x, x0 + k a0 (mod M) are the solutions
 ll div(ll a, ll b, ll M)
 {
 	ll u = 1, x = 0, s = a, t = M;
@@ -92,8 +94,9 @@ ll div(ll a, ll b, ll M)
 		swap(x -= u * q, u);
 		swap(t -= s * q, s);
 	}
-	if (b % t) return -1; // infeasible
-	return (x < 0 ? (x + M) : x) * (b / t) % M;
+	if (b % t) return { -1, -1 }; // infeasible
+	ll x0 = (x * (b / t) % M + M) % M, a0 = M / t;
+	return (x0 + (M - x0 + a0 - 1) / a0 * a0) % M;
 }
 
 // Modular Matrix

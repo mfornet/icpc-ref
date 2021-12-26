@@ -167,6 +167,46 @@ public:
 	segment_tree(int n) : n(n), st(2 * n - 1) {}
 };
 
+struct node_max // query max, add in range
+{
+	struct node_container
+	{
+		int x;
+
+		template<typename T>
+		inline void build(const T &a) // build(leave) from a
+		{
+			x = a;
+		}
+
+		friend node_container operator+(node_container l, const node_container &r) // merge l and r
+		{
+			l.x = max(l.x, r.x);
+			return l;
+		}
+
+		node_container() : x(0) {}
+	} nod;
+
+	struct lazy_container
+	{
+		int add;
+
+		inline bool operator()() // has lazy
+		{
+			return add != 0;
+		}
+
+		lazy_container(int a = 0) : add(a) {}
+	} lazy;
+
+	inline void apply(int l, int r, lazy_container &p) // apply lazy
+	{
+		nod.x += p.add;
+		lazy.add += p.add;
+	}
+};
+
 struct node // arithmetic progression
 {
 	struct node_container

@@ -31,13 +31,18 @@ vector<point> intersect(line L, circle C)
 }
 
 // circle tangents through point
+// vector<point> tangent(point p, circle C) // wrong
+// {
+// 	double sin2 = C.r*C.r/norm(p - C.p);
+// 	if (sign(1 - sin2) < 0) return {};
+// 	if (sign(1 - sin2) == 0) return {p};
+// 	point z(sqrt(1 - sin2), sqrt(sin2));
+// 	return {p + (C.p - p)*conj(z), p + (C.p - p)*z};
+// }
+
 vector<point> tangent(point p, circle C)
 {
-	double sin2 = C.r*C.r/norm(p - C.p);
-	if (sign(1 - sin2) < 0) return {};
-	if (sign(1 - sin2) == 0) return {p};
-	point z(sqrt(1 - sin2), sqrt(sin2));
-	return {p + (C.p - p)*conj(z), p + (C.p - p)*z};
+	return intersect(C, { p, sqrt(norm(p - C.p) - C.r * C.r) });
 }
 
 bool incircle(point a, point b, point c, point p)

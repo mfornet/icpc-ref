@@ -159,7 +159,7 @@ struct node : splay_tree<node*>
 {
 	ll x, sub, vsub;
 
-	node() : splay_tree() { sub = vsub = 0; }
+	node() : splay_tree() { x = sub = vsub = 0; }
 
 	void update() override
 	{

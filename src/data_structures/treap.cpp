@@ -1,3 +1,4 @@
+// capacity MUST be correct if you use new_node
 template<class node, bool persistent, int capacity = 0>
 struct treap
 {
@@ -75,7 +76,7 @@ struct treap
 		while (u)
 		{
 			push(u);
-			if (u->ky < ky) l += size(u->l) + 1, u = u->r;
+			if (u->key < ky) l += size(u->l) + 1, u = u->r;
 			else u = u->l;
 		}
 		return l;
@@ -97,7 +98,7 @@ struct treap
 	{
 		return !persistent ? u : new_node(*u);
 	}
-	
+
 	vector<node> nodes;
 	treap() { nodes.reserve(capacity); }
 
@@ -135,7 +136,7 @@ struct node
 		return x;
 	}
 
-	void apply(lazy_container &p)
+	void apply(const lazy_container &p)
 	{
 		key.x += p.add;
 		lazy.add += p.add;
