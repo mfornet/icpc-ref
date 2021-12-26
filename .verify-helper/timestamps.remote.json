@@ -50,5 +50,6 @@
 "tests/number_theory/big_integer_mul2.test.cpp": "2021-12-26 13:41:33 -0500",
 "tests/number_theory/big_integer_rem.test.cpp": "2021-12-26 13:41:33 -0500",
 "tests/number_theory/big_integer_sub.test.cpp": "2021-12-26 13:41:33 -0500",
-"tests/string/suffix_array.test.cpp": "2021-02-11 01:47:59 -0500"
+"tests/string/suffix_array.test.cpp": "2021-02-11 01:47:59 -0500",
+"tests/string/suffix_array_linear.test.cpp": "2021-12-26 13:41:33 -0500"
 }
