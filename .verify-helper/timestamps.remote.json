@@ -37,6 +37,7 @@
 "tests/graph/lct5.test.cpp": "2021-12-26 13:41:33 -0500",
 "tests/graph/lct_lca.test.cpp": "2021-12-26 13:41:33 -0500",
 "tests/graph/merkle_tree.test.cpp": "2021-12-26 14:32:05 -0500",
+"tests/graph/merkle_tree2.test.cpp": "2021-12-26 14:32:05 -0500",
 "tests/graph/min_cost_flow.test.cpp": "2021-12-26 13:41:33 -0500",
 "tests/graph/push_relabel.test.cpp": "2020-03-16 03:59:16 -0400",
 "tests/graph/strongly_connected_component.test.cpp": "2020-10-03 01:18:11 -0400",
