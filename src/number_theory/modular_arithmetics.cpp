@@ -94,7 +94,7 @@ ll div(ll a, ll b, ll M)
 		swap(x -= u * q, u);
 		swap(t -= s * q, s);
 	}
-	if (b % t) return { -1, -1 }; // infeasible
+	if (b % t) return -1; // infeasible
 	ll x0 = (x * (b / t) % M + M) % M, a0 = M / t;
 	return (x0 + (M - x0 + a0 - 1) / a0 * a0) % M;
 }
